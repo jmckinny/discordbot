@@ -26,13 +26,36 @@ client.on('message', message =>{
         const helpmssg = "Use " + prefix + " followed by a command to use the bot"
         message.channel.send(helpmssg);
     }else if(command === 'join'){ //Adds the user to the active players
-        players.set(message.author.id,new Player(message.author.username));
+        if(players.has(message.author.id)){
+            message.channel.send("Error " + players.get(message.author.id).mention + " already has joined")
+        }else{
+            players.set(message.author.id,new Player(message.author.id,message.author.username));
         
-        console.log("Created user " + message.author.username + " id:" + message.author.id);
-        console.log(players);
-    }else if(command === 'gold'){
+            console.log("Created user " + message.author.username + " id:" + message.author.id);
+            console.log(players);
+        }
+        
+    }else if(command === 'gold'){//Gets the gold of the player
+        if(args[0] == null){
+            let player = players.get(message.author.id);
+            message.channel.send(player.mention + " : " + player.gold + " gold");
+        }else{
+            let member = message.mentions.members.first();
+            if(!players.has(member.id)){
+                message.channel.send("That user does not exist");
+            }else{
+                let player = players.get(member.id);
+                message.channel.send(player.mention + " : " + player.gold + " gold");
+            }
+        }
+        
+    }else if(command === 'coinflip'){
         let player = players.get(message.author.id);
-        message.channel.send(player.name + " : " + player.gold + " gold");
+        if(Math.ceil(Math.random() * 2) === 1){
+            message.channel.send("Winner!");
+        }else{
+            message.channel.send("Loser!");
+        }
     }
 
 

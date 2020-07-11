@@ -1,7 +1,8 @@
 
 class Player {
-    constructor(name) {
+    constructor(id,name) {
         this.name = name;
+        this.mention = "<@"+id+">";
         this.gold = 50;
     }
 
