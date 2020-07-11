@@ -1,5 +1,4 @@
 # TODO
-1. Make commands Dynamic
-2. Add Deathroll
+1. Add Deathroll
+2. Make trivia give gold
 3. Update documentation
-4. Add Trivia game
