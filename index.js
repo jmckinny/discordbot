@@ -4,7 +4,7 @@ const { prefix, token } = require('./config.json');
 const client = new Discord.Client();
 // const deathroll = require('./deathroll');
 
-let players = [];
+let players = new Map();
 
 client.once('ready', () => {
     console.log("READY!");
@@ -26,10 +26,13 @@ client.on('message', message =>{
         const helpmssg = "Use " + prefix + " followed by a command to use the bot"
         message.channel.send(helpmssg);
     }else if(command === 'join'){ //Adds the user to the active players
-        players.push(new Player(message.author.id,message.author.username));
-        console.log("Created user " + message.author.username + " id:" + message.author.id);
-    }else if(command === 'gold'){
+        players.set(message.author.id,new Player(message.author.username));
         
+        console.log("Created user " + message.author.username + " id:" + message.author.id);
+        console.log(players);
+    }else if(command === 'gold'){
+        let player = players.get(message.author.id);
+        message.channel.send(player.name + " : " + player.gold + " gold");
     }
 
 
