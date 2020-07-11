@@ -1,3 +1,4 @@
+
 class Player {
     constructor(id, name) {
         this.id = id;
@@ -11,3 +12,4 @@ class Player {
     }
 
 }
+module.exports = Player
