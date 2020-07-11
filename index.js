@@ -3,12 +3,12 @@ const Discord = require('discord.js');
 const { prefix, token } = require('./config.json');
 const client = new Discord.Client(); //Make client
 client.commands = new Discord.Collection(); //Add the list of commands to a collection
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js')); //Pull all command files
 
 
 let players = new Map();
 
-for (const file of commandFiles) {
+for (const file of commandFiles) { //Loop through command files and create a hashtable of them
 	const command = require(`./commands/${file}`);
 	client.commands.set(command.name, command);
 }
