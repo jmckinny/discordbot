@@ -1,12 +1,20 @@
 const fs = require('fs'); //Require the filesystem interface
 const Discord = require('discord.js');
+const mongo = require('mongodb');
+const monk = require('monk')('localhost/players')
 const { prefix, token } = require('./config.json');
 const client = new Discord.Client(); //Make client
 client.commands = new Discord.Collection(); //Add the list of commands to a collection
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js')); //Pull all command files
 
 
-let players = new Map();
+//MongoDB setup/////
+const players = monk.get('players');
+
+
+///////////////////
+
+
 
 for (const file of commandFiles) { //Loop through command files and create a hashtable of them
 	const command = require(`./commands/${file}`);
