@@ -6,6 +6,10 @@ class Player {
         this.gold = 50;
     }
 
+    addGold(toAdd){
+        this.gold += toAdd;
+    }
+
     roll(number) { //Generates a random number from 1 to number
         return Math.ceil(Math.random() * number);
     }

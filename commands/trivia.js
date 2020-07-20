@@ -74,20 +74,32 @@ module.exports = {
             }
         };
 
+        function addGold(collected){
+            console.log(collected.first().author.id);
+            if(players.has(collected.first().author.id)){
+                cur = players.get(collected.first().author.id);
+                cur.addGold(5);
+                message.channel.send(`${collected.first().author} recived 5 gold!`);
+            }else{
+                message.channel.send(`${collected.first().author} you must join to receive gold`);
+            }
+        }
+
         message.channel.send(formmated_message).then(() =>{
             message.channel.awaitMessages(filter, {max: 1, time: 30000, errors: ['time'] })
             .then(collected =>{
                 
                 if(collected.first().content.toLowerCase() === correct ){
                     message.channel.send(`${collected.first().author} responded correctly`);
+                    addGold(collected);
                 }else{
                     message.channel.send(`${collected.first().author} responded incorrectly`);
                 }
                 
             })
-            .catch(collected =>{
-                message.channel.send("Time is up!");
-            })
+            // .catch(collected =>{
+            //     message.channel.send("Time is up!");
+            // })
             .then(()=>{
                 message.channel.send(`The correct answer was ${correct.toUpperCase()} = ${trivia.results[0].correct_answer}`);
             })
