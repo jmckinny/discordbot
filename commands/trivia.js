@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const shuffle = require('shuffle-array');
+const html = require('html-entities').AllHtmlEntities;
 module.exports = {
     name: 'trivia',
     descrption: 'answer a trivia question for gold!',
@@ -34,14 +35,14 @@ module.exports = {
         console.log(correct);
 
 
-        const category = trivia.results[0].category;
-        const difficulty = trivia.results[0].difficulty;
-        const question = trivia.results[0].question;
+        const category = html.decode(trivia.results[0].category);
+        const difficulty = html.decode(trivia.results[0].difficulty);
+        const question = html.decode(trivia.results[0].question);
 
-        const A = answers[0];
-        const B = answers[1];
-        const C = answers[2];
-        const D = answers[3];
+        const A = html.decode(answers[0]);
+        const B = html.decode(answers[1]);
+        const C = html.decode(answers[2]);
+        const D = html.decode(answers[3]);
 
         
         
@@ -101,7 +102,7 @@ module.exports = {
                 message.channel.send("Time is up!");
             })
             .then(()=>{
-                message.channel.send(`The correct answer was ${correct.toUpperCase()} = ${trivia.results[0].correct_answer}`);
+                message.channel.send(`The correct answer was ${correct.toUpperCase()} = ${html.decode(trivia.results[0].correct_answer)}`);
             })
             
         });
