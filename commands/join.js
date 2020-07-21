@@ -9,7 +9,7 @@ module.exports={
             players.set(message.author.id,new Player(message.author.id,message.author.username));
         
             console.log("Created user " + message.author.username + " id:" + message.author.id);
-            console.log(players);
+            message.reply(`created user`);
         }
     }
 }
