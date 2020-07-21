@@ -4,7 +4,7 @@ module.exports = {
     name: 'trivia',
     descrption: 'answer a trivia question for gold!',
     async execute(message, args, players) {
-        let response = await fetch('https://opentdb.com/api.php?amount=1&type=multiple');
+        let response = await fetch('https://opentdb.com/api.php?amount=1&type=multiple'); //Fetch a question from the database
         let trivia = await response.json();
         console.log(trivia);
 
@@ -59,7 +59,7 @@ module.exports = {
         D: ${D}`;
 
 
-        const filter = user_answer =>{
+        const filter = user_answer =>{ //make sure the collector only gets valid answer choices
             switch(user_answer.content.toLowerCase()){
                 case 'a':
                     return true;
@@ -74,7 +74,7 @@ module.exports = {
             }
         };
 
-        function addGold(collected){
+        function addGold(collected){ //adds the amount of gold to the player given the collected response
             console.log(collected.first().author.id);
             if(players.has(collected.first().author.id)){
                 cur = players.get(collected.first().author.id);
@@ -86,10 +86,10 @@ module.exports = {
         }
 
         message.channel.send(formmated_message).then(() =>{
-            message.channel.awaitMessages(filter, {max: 1, time: 30000, errors: ['time'] })
+            message.channel.awaitMessages(filter, {max: 1, time: 30000, errors: ['time'] }) //Collect messages for 30000ms with a max of one
             .then(collected =>{
                 
-                if(collected.first().content.toLowerCase() === correct ){
+                if(collected.first().content.toLowerCase() === correct ){ //Check if its the correct letter
                     message.channel.send(`${collected.first().author} responded correctly`);
                     addGold(collected);
                 }else{
@@ -97,7 +97,7 @@ module.exports = {
                 }
                 
             })
-            .catch(collected =>{
+            .catch(collected =>{ //This catches all errors which is not ideal
                 message.channel.send("Time is up!");
             })
             .then(()=>{
