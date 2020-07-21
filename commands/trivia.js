@@ -11,6 +11,8 @@ module.exports = {
 
         let answers = trivia.results[0].incorrect_answers.concat(trivia.results[0].correct_answer);
         shuffle(answers);
+
+        //This bit finds which of the letter choices corresponds to the correct answer and stores the letter in the "correct" variable
         let correct;
         for(let i = 0; i < answers.length; i++){
             if(answers[i] === trivia.results[0].correct_answer){
@@ -38,18 +40,12 @@ module.exports = {
         const category = html.decode(trivia.results[0].category);
         const difficulty = html.decode(trivia.results[0].difficulty);
         const question = html.decode(trivia.results[0].question);
+        const correct_answer = html.decode(trivia.results[0].correct_answer);
 
         const A = html.decode(answers[0]);
         const B = html.decode(answers[1]);
         const C = html.decode(answers[2]);
         const D = html.decode(answers[3]);
-
-        
-        
-
-
-
-
 
         const formmated_message = `Question: ${question} 
         Category: ${category}
@@ -102,7 +98,7 @@ module.exports = {
                 message.channel.send("Time is up!");
             })
             .then(()=>{
-                message.channel.send(`The correct answer was ${correct.toUpperCase()} = ${html.decode(trivia.results[0].correct_answer)}`);
+                message.channel.send(`The correct answer was ${correct.toUpperCase()} = ${correct_answer}`);
             })
             
         });
