@@ -97,9 +97,9 @@ module.exports = {
                 }
                 
             })
-            // .catch(collected =>{
-            //     message.channel.send("Time is up!");
-            // })
+            .catch(collected =>{
+                message.channel.send("Time is up!");
+            })
             .then(()=>{
                 message.channel.send(`The correct answer was ${correct.toUpperCase()} = ${trivia.results[0].correct_answer}`);
             })
