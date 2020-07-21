@@ -4,6 +4,7 @@ class Player {
         this.name = name;
         this.mention = "<@"+id+">";
         this.gold = 50;
+        this.id = id;
     }
 
     addGold(toAdd){
