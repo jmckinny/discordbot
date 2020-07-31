@@ -1,7 +1,7 @@
 const Player = require('../player.js');
 module.exports={
     name:'join',
-    descritpion: 'adds player to list of active players',
+    description: 'adds player to list of active players',
     execute(message,args,players){
         if(players.has(message.author.id)){
             message.channel.send("Error " + players.get(message.author.id).mention + " already has joined")

@@ -3,7 +3,7 @@ const shuffle = require('shuffle-array');
 const html = require('html-entities').AllHtmlEntities;
 module.exports = {
     name: 'trivia',
-    descrption: 'answer a trivia question for gold!',
+    description: 'answer a trivia question for gold!',
     async execute(message, args, players) {
         let response = await fetch('https://opentdb.com/api.php?amount=1&type=multiple'); //Fetch a question from the database
         let trivia = await response.json();
