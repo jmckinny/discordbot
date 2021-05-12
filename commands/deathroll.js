@@ -13,6 +13,10 @@ module.exports = {
             let player1 = players.get(message.author.id);
             let player2 = players.get(member.id);
             let gameover = false;
+	    if (amount <= 1){
+            	message.reply("Invalid gold amount");
+		return;
+	    }
             if(amount > player1.gold || amount > player2.gold){
                 message.channel.send("Not all users have the required gold!");
                 return;

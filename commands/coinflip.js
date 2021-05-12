@@ -12,6 +12,10 @@ module.exports={
             }
         }else{
             const amount = parseInt(args[0]);
+	    if(amount <= 0){
+                message.reply("Invalid gold amount");
+		return;
+	    }
             if(amount > player.gold){
                 message.reply("You don't have that much gold!");
                 return;
