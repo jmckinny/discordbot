@@ -1,3 +1,4 @@
+let isNaN = (maybeNaN) => maybeNaN != maybeNaN;
 module.exports={
     name: 'coinflip',
     description: 'a 50% chance to win!',
@@ -12,7 +13,7 @@ module.exports={
             }
         }else{
             const amount = parseInt(args[0]);
-	    if(amount <= 0){
+	    if(isNaN(amount) || amount <= 0){
                 message.reply("Invalid gold amount");
 		return;
 	    }
@@ -31,3 +32,5 @@ module.exports={
         
     }
 }
+
+

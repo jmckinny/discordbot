@@ -1,3 +1,4 @@
+let isNaN = (maybeNaN) => maybeNaN != maybeNaN;
 module.exports = {
     name: 'deathroll',
     description: 'starts a deathroll agaisnt a given player',
@@ -13,8 +14,8 @@ module.exports = {
             let player1 = players.get(message.author.id);
             let player2 = players.get(member.id);
             let gameover = false;
-	    if (amount <= 1){
-            	message.reply("Invalid gold amount");
+	    if (isNaN(amount) || amount <= 1){
+            message.reply("Invalid gold amount");
 		return;
 	    }
             if(amount > player1.gold || amount > player2.gold){
