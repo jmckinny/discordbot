@@ -1,4 +1,3 @@
-let isNaN = (maybeNaN) => maybeNaN != maybeNaN;
 module.exports={
     name: 'coinflip',
     description: 'a 50% chance to win!',

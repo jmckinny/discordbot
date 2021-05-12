@@ -1,4 +1,3 @@
-let isNaN = (maybeNaN) => maybeNaN != maybeNaN;
 module.exports = {
     name: 'deathroll',
     description: 'starts a deathroll agaisnt a given player',
