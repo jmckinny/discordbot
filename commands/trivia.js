@@ -71,12 +71,13 @@ module.exports = {
             }
         };
 
-        function addGold(collected){ //adds the amount of gold to the player given the collected response
+        function addGold(collected,difficulty_modifier){ //adds the amount of gold to the player given the collected response
             console.log(collected.first().author.id);
             if(players.has(collected.first().author.id)){
                 cur = players.get(collected.first().author.id);
-                cur.addGold(5);
-                message.channel.send(`${collected.first().author} recived 5 gold!`);
+                gold_add = 5 * difficulty_modifier;
+                cur.addGold(gold_add);
+                message.channel.send(`${collected.first().author} recived ${gold_add} gold!`);
             }else{
                 message.channel.send(`${collected.first().author} you must join to receive gold`);
             }
@@ -88,7 +89,20 @@ module.exports = {
                 
                 if(collected.first().content.toLowerCase() === correct ){ //Check if its the correct letter
                     message.channel.send(`${collected.first().author} responded correctly`);
-                    addGold(collected);
+                    switch(difficulty.toLowerCase()){
+                        case 'easy':
+                            addGold(collected,1);
+                            break;
+                        case 'medium':
+                            addGold(collected,2);
+                            break;
+                        case 'hard':
+                            addGold(collected,5);
+                            break;
+                        default: //If the difficulty is unknown????
+                            addGold(collected,1);
+
+                    }
                 }else{
                     message.channel.send(`${collected.first().author} responded incorrectly`);
                 }
