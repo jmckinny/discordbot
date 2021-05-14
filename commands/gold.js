@@ -1,6 +1,6 @@
 module.exports={
     name: 'gold',
-    description: 'returns current gold of the player',
+    description: '[@player]',
     execute(message,args,players){
         if(!players.has(message.author.id)){
             message.reply("You have not joined!");

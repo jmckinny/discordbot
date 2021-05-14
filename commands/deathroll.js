@@ -1,6 +1,6 @@
 module.exports = {
     name: 'deathroll',
-    description: 'starts a deathroll agaisnt a given player',
+    description: '<@player> <gold amount>',
     execute(message, args, players) {
         let member = message.mentions.members.first();
         let amount = parseInt(args[1]);

@@ -1,6 +1,6 @@
 module.exports={
     name: 'coinflip',
-    description: 'a 50% chance to win!',
+    description: '[gold]',
     execute(message,args,players){
         let player = players.get(message.author.id);
         console.log(args[0]);

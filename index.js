@@ -29,15 +29,27 @@ client.on('message', message =>{
     const args = message.content.slice(prefix.length).split(/ +/);
     const command = args.shift().toLowerCase();
 
-    if(!client.commands.has(command)) return;
-
-    try{
-        client.commands.get(command).execute(message,args,players);
-    }catch(error){
-        console.error(error);
-        message.reply('there was an error trying to execute that command!');
+    
+    if(command === "commands"){
+        list_commands(message,client.commands);
+    }else{
+        if(!client.commands.has(command)) return;
+        try{
+            client.commands.get(command).execute(message,args,players);
+        }catch(error){
+            console.error(error);
+            message.reply('there was an error trying to execute that command!');
+        }  
     }
     
 
 });
+
+function list_commands(message, commands){
+    let str = "Usage:\n";
+    commands.forEach(element => {
+        str += `${element.name} ${element.description}\n`;
+    });
+    message.channel.send(str);
+}
 

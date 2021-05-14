@@ -1,6 +1,6 @@
 module.exports = {
     name: 'playing',
-    description: 'lists active players',
+    description: ': lists active players',
     execute(message,args,players){
         message.channel.send(`There are ${players.size} active players`);
         if(players.size > 0){
