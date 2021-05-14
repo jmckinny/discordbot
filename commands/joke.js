@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 module.exports = {
     name : "joke",
-    descrption : ": tells a joke!",
+    description : ": tells a joke!",
     execute(message,args,players){
         const url = "https://icanhazdadjoke.com/"
         fetch(url, {method : "GET", headers : {'Accept': 'application/json'}})
