@@ -1,6 +1,7 @@
 mod commands;
 use crate::commands::info::*;
 use crate::commands::ping::*;
+use crate::commands::trivia::*;
 
 use dotenv::dotenv;
 use serenity::framework::standard::macros::help;
@@ -55,7 +56,7 @@ async fn my_help(
 }
 
 #[group]
-#[commands(ping, info)]
+#[commands(ping, info, trivia)]
 struct General;
 
 //Hooks
