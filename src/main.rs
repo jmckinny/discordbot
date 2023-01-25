@@ -3,16 +3,20 @@ use crate::commands::info::*;
 use crate::commands::ping::*;
 
 use dotenv::dotenv;
-use serenity::framework::standard::CommandResult;
+use serenity::framework::standard::macros::help;
+use serenity::model::prelude::UserId;
 use std::collections::HashSet;
 use std::env;
 use std::sync::Arc;
+
+use serenity::framework::standard::{
+    help_commands, Args, CommandGroup, CommandResult, HelpOptions, StandardFramework,
+};
 
 use serenity::async_trait;
 use serenity::client::bridge::gateway::ShardManager;
 use serenity::framework::standard::macros::group;
 use serenity::framework::standard::macros::hook;
-use serenity::framework::StandardFramework;
 use serenity::http::Http;
 use serenity::model::channel::Message;
 use serenity::model::event::ResumedEvent;
@@ -36,6 +40,18 @@ impl EventHandler for Handler {
     async fn resume(&self, _: Context, _: ResumedEvent) {
         info!("Resumed");
     }
+}
+#[help]
+async fn my_help(
+    context: &Context,
+    msg: &Message,
+    args: Args,
+    help_options: &'static HelpOptions,
+    groups: &[&'static CommandGroup],
+    owners: HashSet<UserId>,
+) -> CommandResult {
+    help_commands::with_embeds(context, msg, args, help_options, groups, owners).await?;
+    Ok(())
 }
 
 #[group]
@@ -88,6 +104,7 @@ async fn main() {
         .configure(|c| c.owners(owners).prefix("!"))
         .after(after)
         .before(before)
+        .help(&MY_HELP)
         .unrecognised_command(unknown_command)
         .group(&GENERAL_GROUP);
 
