@@ -68,6 +68,7 @@ struct Question {
 type TriviaQuestion = (usize, String);
 
 impl Response {
+    //TODO: Fix this API by creating a processed trivia question type
     fn to_message(&self) -> TriviaQuestion {
         let question = html_escape::decode_html_entities(&self.results[0].question);
         let category = html_escape::decode_html_entities(&self.results[0].category);
