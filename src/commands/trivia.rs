@@ -35,6 +35,13 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
                     .build();
                 answer.reply(ctx, response).await?;
             }
+        } else {
+            let response = MessageBuilder::new()
+                .push_line("Invalid Response.")
+                .push("The correct answer was: ")
+                .push(trivia_question.correct_answer)
+                .build();
+            answer.reply(ctx, response).await?;
         }
     } else {
         let response = MessageBuilder::new()
