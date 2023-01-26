@@ -13,8 +13,10 @@ const API_URL: &str = "https://opentdb.com/api.php?amount=1&type=multiple";
 #[command]
 pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
     let response: Response = serde_json::from_str(&reqwest::get(API_URL).await?.text().await?)?;
-    let (correct_answer, mssg) = response.to_message();
-    msg.channel_id.say(&ctx.http, mssg).await?;
+    let trivia_question = response.to_message();
+    msg.channel_id
+        .say(&ctx.http, trivia_question.formated_message)
+        .await?;
 
     if let Some(answer) = &msg
         .author
@@ -23,25 +25,22 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
         .await
     {
         if let Ok(n) = answer.content.to_lowercase().parse::<usize>() {
-            if n == correct_answer {
+            if n == trivia_question.correct_index {
                 answer.reply(ctx, "That's correct!").await?;
             } else {
-                let correct_answer =
-                    html_escape::decode_html_entities(&response.results[0].correct_answer);
                 let response = MessageBuilder::new()
                     .push_line("Wrong.")
                     .push("The correct answer was: ")
-                    .push(correct_answer)
+                    .push(trivia_question.correct_answer)
                     .build();
                 answer.reply(ctx, response).await?;
             }
         }
     } else {
-        let correct_answer = html_escape::decode_html_entities(&response.results[0].correct_answer);
         let response = MessageBuilder::new()
             .push_line("No answer within 10 seconds.")
             .push("The correct answer was: ")
-            .push(correct_answer)
+            .push(trivia_question.correct_answer)
             .build();
         msg.reply(ctx, response).await?;
     };
@@ -65,10 +64,13 @@ struct Question {
     incorrect_answers: Vec<String>,
 }
 
-type TriviaQuestion = (usize, String);
+struct TriviaQuestion {
+    formated_message: String,
+    correct_index: usize,
+    correct_answer: String,
+}
 
 impl Response {
-    //TODO: Fix this API by creating a processed trivia question type
     fn to_message(&self) -> TriviaQuestion {
         let question = html_escape::decode_html_entities(&self.results[0].question);
         let category = html_escape::decode_html_entities(&self.results[0].category);
@@ -91,23 +93,26 @@ impl Response {
             .collect::<Vec<String>>()
             .join("\n");
 
-        let mut correct_number = 0;
+        let mut correct_index = 0;
         for (i, s) in answers.iter().enumerate() {
             if s == &correct_answer {
-                correct_number = i + 1;
+                correct_index = i + 1;
                 break;
             }
         }
 
-        (
-            correct_number,
-            MessageBuilder::new()
-                .push("Question: ")
-                .push_bold_line(question)
-                .push("Category: ")
-                .push_bold_line(category)
-                .push(choices)
-                .build(),
-        )
+        let formated_message = MessageBuilder::new()
+            .push("Question: ")
+            .push_bold_line(question)
+            .push("Category: ")
+            .push_bold_line(category)
+            .push(choices)
+            .build();
+
+        TriviaQuestion {
+            formated_message,
+            correct_index,
+            correct_answer: correct_answer.to_string(),
+        }
     }
 }
