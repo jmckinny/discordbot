@@ -30,9 +30,12 @@ pub async fn weather(ctx: &Context, msg: &Message) -> CommandResult {
     let weather_message = MessageBuilder::new()
         .push_line("Weather for College Park MD")
         .push_bold_line(format!("{temprature}°{temperature_unit} {forecast}"))
-        .push(icon_url)
         .build();
-    msg.channel_id.say(&ctx, weather_message).await?;
 
+    msg.channel_id
+        .send_message(&ctx, |m| {
+            m.content(weather_message).add_embed(|e| e.image(icon_url))
+        })
+        .await?;
     Ok(())
 }
