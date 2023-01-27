@@ -34,7 +34,11 @@ pub async fn weather(ctx: &Context, msg: &Message) -> CommandResult {
 
     msg.channel_id
         .send_message(&ctx, |m| {
-            m.content(weather_message).add_embed(|e| e.image(icon_url))
+            m.add_embed(|e| {
+                e.image(icon_url);
+                e.title("Weather");
+                e.field(weather_message, "", false)
+            })
         })
         .await?;
     Ok(())
