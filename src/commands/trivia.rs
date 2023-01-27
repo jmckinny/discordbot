@@ -2,8 +2,11 @@ use std::time::Duration;
 
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
+use serenity::builder::CreateButton;
 use serenity::framework::standard::macros::command;
 use serenity::framework::standard::CommandResult;
+use serenity::model::application::component::ButtonStyle;
+use serenity::model::prelude::interaction::InteractionResponseType::UpdateMessage;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::MessageBuilder;
@@ -20,62 +23,89 @@ const HARD_REWARD: u64 = 5;
 pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
     let response: Response = serde_json::from_str(&reqwest::get(API_URL).await?.text().await?)?;
     let trivia_question = response.to_message();
-    msg.reply(&ctx.http, trivia_question.formated_message)
+
+    let m = msg
+        .channel_id
+        .send_message(&ctx, |m| {
+            m.content(&trivia_question.formated_message);
+            m.components(|c| {
+                c.create_action_row(|row| {
+                    row.add_button(create_index_button("one", "1️⃣".parse().unwrap()));
+                    row.add_button(create_index_button("two", "2️⃣".parse().unwrap()));
+                    row.add_button(create_index_button("three", "3️⃣".parse().unwrap()));
+                    row.add_button(create_index_button("four", "4️⃣".parse().unwrap()))
+                })
+            })
+        })
         .await?;
 
-    if let Some(answer) = &msg
-        .author
-        .await_reply(ctx)
+    let interaction = match m
+        .await_component_interaction(ctx)
         .timeout(Duration::from_secs(10))
         .await
     {
-        if let Ok(n) = answer.content.to_lowercase().parse::<usize>() {
-            if n == trivia_question.correct_index {
-                let reward = match trivia_question.difficulty {
-                    Difficulty::Easy => EASY_REWARD,
-                    Difficulty::Medium => MEDIUM_REWARD,
-                    Difficulty::Hard => HARD_REWARD,
-                };
-
-                let mut data = ctx.data.write().await;
-                let token_counter = data
-                    .get_mut::<TokenCounter>()
-                    .expect("Expected TokenCounter in TypeMap");
-
-                if let Some(v) = token_counter.get_mut(&msg.author.id) {
-                    *v += reward;
-                } else {
-                    token_counter.insert(msg.author.id, reward);
-                }
-                let reply = MessageBuilder::new()
-                    .push_line("That's correct!")
-                    .push_line(format!("You recieved {reward} tokens"))
-                    .build();
-                answer.reply(ctx, reply).await?;
-            } else {
-                let response = MessageBuilder::new()
-                    .push_line("Wrong.")
-                    .push("The correct answer was: ")
-                    .push(trivia_question.correct_answer)
-                    .build();
-                answer.reply(ctx, response).await?;
-            }
-        } else {
-            let response = MessageBuilder::new()
-                .push_line("Invalid Response.")
-                .push("The correct answer was: ")
+        Some(x) => x,
+        None => {
+            let timeout_msg = MessageBuilder::new()
+                .push_line("Timed out!")
+                .push("Correct answer was: ")
                 .push(trivia_question.correct_answer)
                 .build();
-            answer.reply(ctx, response).await?;
+            msg.reply(&ctx, timeout_msg).await?;
+            return Ok(());
         }
+    };
+
+    let answer = &interaction.data.custom_id;
+
+    interaction
+        .create_interaction_response(&ctx, |r| {
+            r.kind(UpdateMessage).interaction_response_data(|d| {
+                d.content(
+                    MessageBuilder::new()
+                        .push_line(trivia_question.formated_message)
+                        .push_line("")
+                        .push(&msg.author.name)
+                        .push(" answered: ")
+                        .push_bold(&trivia_question.all_answers[string_to_index(answer)])
+                        .build(),
+                );
+                d.components(|c| c)
+            })
+        })
+        .await?;
+
+    if answer == &index_to_string(trivia_question.correct_index) {
+        let reward = match trivia_question.difficulty {
+            Difficulty::Easy => EASY_REWARD,
+            Difficulty::Medium => MEDIUM_REWARD,
+            Difficulty::Hard => HARD_REWARD,
+        };
+
+        let mut data = ctx.data.write().await;
+        let token_counter = data
+            .get_mut::<TokenCounter>()
+            .expect("Expected TokenCounter in TypeMap");
+
+        if let Some(v) = token_counter.get_mut(&msg.author.id) {
+            *v += reward;
+        } else {
+            token_counter.insert(msg.author.id, reward);
+        }
+        let reply = MessageBuilder::new()
+            .push_line("That's correct!")
+            .push_line(format!("You recieved {reward} tokens"))
+            .build();
+        msg.reply(ctx, reply).await?;
     } else {
         let response = MessageBuilder::new()
-            .push_line("No answer within 10 seconds.")
+            .push_line("Wrong.")
             .push("The correct answer was: ")
             .push(trivia_question.correct_answer)
             .build();
         msg.reply(ctx, response).await?;
-    };
+    }
+
     Ok(())
 }
 
@@ -104,6 +134,7 @@ struct TriviaQuestion {
     formated_message: String,
     correct_index: usize,
     correct_answer: String,
+    all_answers: Vec<String>,
     difficulty: Difficulty,
 }
 
@@ -162,7 +193,37 @@ impl Response {
             formated_message,
             correct_index,
             correct_answer: correct_answer.to_string(),
+            all_answers: answers,
             difficulty,
         }
+    }
+}
+
+fn create_index_button(name: &str, emoji: ReactionType) -> CreateButton {
+    let mut b = CreateButton::default();
+    b.custom_id(name);
+    b.label("");
+    b.style(ButtonStyle::Primary);
+    b.emoji(emoji);
+    b
+}
+
+fn index_to_string(index: usize) -> String {
+    match index {
+        1 => String::from("one"),
+        2 => String::from("two"),
+        3 => String::from("three"),
+        4 => String::from("four"),
+        _ => panic!("Invalid answer index"),
+    }
+}
+
+fn string_to_index(input: &str) -> usize {
+    match input {
+        "one" => 1,
+        "two" => 2,
+        "three" => 3,
+        "four" => 4,
+        _ => panic!("Invalid index"),
     }
 }

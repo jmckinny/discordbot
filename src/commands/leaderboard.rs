@@ -16,7 +16,7 @@ pub async fn leaderboard(ctx: &Context, msg: &Message) -> CommandResult {
     let mut leaderboard_fields = Vec::new();
     for (index, (id, tokens)) in sorted.iter().enumerate() {
         let user = ctx.http.get_user(*id.as_u64()).await?;
-        leaderboard_fields.push(format!("{}. {} : {} tokens", index + 1, user.name, tokens));
+        leaderboard_fields.push(format!("{}. {} : {} :coin:", index + 1, user.name, tokens));
     }
 
     let leaderboard_fields: Vec<(String, String, bool)> = leaderboard_fields
