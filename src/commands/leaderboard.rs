@@ -10,7 +10,7 @@ pub async fn leaderboard(ctx: &Context, msg: &Message) -> CommandResult {
     let token_counter = data
         .get::<TokenCounter>()
         .expect("Failed to find TokenCounter in TypeMap");
-    let mut sorted: Vec<(&UserId, &u64)> = token_counter.into_iter().collect();
+    let mut sorted: Vec<(&UserId, &u64)> = token_counter.iter().collect();
     sorted.sort_by(|(_, tokens1), (_, tokens2)| tokens2.cmp(tokens1));
 
     let mut leaderboard_fields = Vec::new();
