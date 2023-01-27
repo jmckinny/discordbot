@@ -8,7 +8,13 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::MessageBuilder;
 
+use crate::TokenCounter;
+
 const API_URL: &str = "https://opentdb.com/api.php?amount=1&type=multiple";
+
+const EASY_REWARD: u64 = 1;
+const MEDIUM_REWARD: u64 = 3;
+const HARD_REWARD: u64 = 5;
 
 #[command]
 pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
@@ -26,7 +32,25 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
     {
         if let Ok(n) = answer.content.to_lowercase().parse::<usize>() {
             if n == trivia_question.correct_index {
-                answer.reply(ctx, "That's correct!").await?;
+                let reward = match trivia_question.difficulty {
+                    Difficulty::Easy => EASY_REWARD,
+                    Difficulty::Medium => MEDIUM_REWARD,
+                    Difficulty::Hard => HARD_REWARD,
+                };
+
+                let mut data = ctx.data.write().await;
+                let token_counter = data
+                    .get_mut::<TokenCounter>()
+                    .expect("Expected TokenCounter in TypeMap");
+
+                if let Some(v) = token_counter.get_mut(&msg.author.id) {
+                    *v += reward;
+                }
+                let reply = MessageBuilder::new()
+                    .push_line("That's correct!")
+                    .push_line(format!("You recieved {reward} tokens"))
+                    .build();
+                answer.reply(ctx, reply).await?;
             } else {
                 let response = MessageBuilder::new()
                     .push_line("Wrong.")
@@ -70,11 +94,16 @@ struct Question {
     correct_answer: String,
     incorrect_answers: Vec<String>,
 }
-
+enum Difficulty {
+    Easy,
+    Medium,
+    Hard,
+}
 struct TriviaQuestion {
     formated_message: String,
     correct_index: usize,
     correct_answer: String,
+    difficulty: Difficulty,
 }
 
 impl Response {
@@ -115,14 +144,24 @@ impl Response {
             .push("Category: ")
             .push_bold_line(category)
             .push("Difficulty: ")
-            .push_bold_line(difficulty)
+            .push_bold_line(difficulty.as_ref())
             .push(choices)
             .build();
+
+        let difficulty = match difficulty.as_ref() {
+            "easy" => Difficulty::Easy,
+            "medium" => Difficulty::Medium,
+            "hard" => Difficulty::Hard,
+            _ => {
+                panic!("Invalid difficulty")
+            }
+        };
 
         TriviaQuestion {
             formated_message,
             correct_index,
             correct_answer: correct_answer.to_string(),
+            difficulty,
         }
     }
 }

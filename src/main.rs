@@ -8,6 +8,7 @@ use crate::commands::weather::*;
 use dotenv::dotenv;
 use serenity::framework::standard::macros::help;
 use serenity::model::prelude::UserId;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::env;
 use std::sync::Arc;
@@ -60,6 +61,12 @@ async fn my_help(
 #[group]
 #[commands(ping, info, trivia, joke, weather)]
 struct General;
+
+struct TokenCounter;
+
+impl TypeMapKey for TokenCounter {
+    type Value = HashMap<UserId, u64>;
+}
 
 //Hooks
 #[hook]
@@ -118,6 +125,7 @@ async fn main() {
     let mut client = Client::builder(&token, intents)
         .framework(framework)
         .event_handler(Handler)
+        .type_map_insert::<TokenCounter>(HashMap::default())
         .await
         .expect("ERROR: failed to create client");
 
