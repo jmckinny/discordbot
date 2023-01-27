@@ -113,7 +113,7 @@ async fn main() {
     };
 
     let framework = StandardFramework::new()
-        .configure(|c| c.owners(owners).prefix("!"))
+        .configure(|c| c.owners(owners).prefix("!").case_insensitivity(true))
         .after(after)
         .before(before)
         .help(&MY_HELP)

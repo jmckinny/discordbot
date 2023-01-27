@@ -38,9 +38,10 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
             })
         })
         .await?;
-
+    let user = msg.author.id;
     let interaction = match m
         .await_component_interaction(ctx)
+        .filter(move |f| f.user.id == user)
         .timeout(Duration::from_secs(10))
         .await
     {
@@ -67,7 +68,7 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
                         .push_line("")
                         .push(&msg.author.name)
                         .push(" answered: ")
-                        .push_bold(&trivia_question.all_answers[string_to_index(answer)])
+                        .push_bold(&trivia_question.all_answers[string_to_index(answer) - 1])
                         .build(),
                 );
                 d.components(|c| c)
