@@ -82,6 +82,7 @@ impl Response {
         let question = html_escape::decode_html_entities(&self.results[0].question);
         let category = html_escape::decode_html_entities(&self.results[0].category);
         let correct_answer = html_escape::decode_html_entities(&self.results[0].correct_answer);
+        let difficulty = html_escape::decode_html_entities(&self.results[0].difficulty);
         let mut incorret_answers = self.results[0]
             .incorrect_answers
             .iter()
@@ -113,6 +114,8 @@ impl Response {
             .push_bold_line(question)
             .push("Category: ")
             .push_bold_line(category)
+            .push("Difficulty: ")
+            .push_bold_line(difficulty)
             .push(choices)
             .build();
 
