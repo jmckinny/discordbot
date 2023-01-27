@@ -45,6 +45,8 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
 
                 if let Some(v) = token_counter.get_mut(&msg.author.id) {
                     *v += reward;
+                } else {
+                    token_counter.insert(msg.author.id, reward);
                 }
                 let reply = MessageBuilder::new()
                     .push_line("That's correct!")
