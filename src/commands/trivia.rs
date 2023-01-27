@@ -20,8 +20,7 @@ const HARD_REWARD: u64 = 5;
 pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
     let response: Response = serde_json::from_str(&reqwest::get(API_URL).await?.text().await?)?;
     let trivia_question = response.to_message();
-    msg.channel_id
-        .say(&ctx.http, trivia_question.formated_message)
+    msg.reply(&ctx.http, trivia_question.formated_message)
         .await?;
 
     if let Some(answer) = &msg
