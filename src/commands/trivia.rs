@@ -30,10 +30,10 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
             m.content(&trivia_question.formated_message);
             m.components(|c| {
                 c.create_action_row(|row| {
-                    row.add_button(create_index_button("one", "1️⃣".parse().unwrap()));
-                    row.add_button(create_index_button("two", "2️⃣".parse().unwrap()));
-                    row.add_button(create_index_button("three", "3️⃣".parse().unwrap()));
-                    row.add_button(create_index_button("four", "4️⃣".parse().unwrap()))
+                    row.add_button(create_index_button("1", "1️⃣".parse().unwrap()));
+                    row.add_button(create_index_button("2", "2️⃣".parse().unwrap()));
+                    row.add_button(create_index_button("3", "3️⃣".parse().unwrap()));
+                    row.add_button(create_index_button("4", "4️⃣".parse().unwrap()))
                 })
             })
         })
@@ -68,7 +68,12 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
                         .push_line("")
                         .push(&msg.author.name)
                         .push(" answered: ")
-                        .push_bold(&trivia_question.all_answers[string_to_index(answer) - 1])
+                        .push_bold(
+                            &trivia_question.all_answers[answer
+                                .parse::<usize>()
+                                .expect("Attempted to parse invalid index")
+                                - 1],
+                        )
                         .build(),
                 );
                 d.components(|c| c)
@@ -76,7 +81,7 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
         })
         .await?;
 
-    if answer == &index_to_string(trivia_question.correct_index) {
+    if answer == &trivia_question.correct_index.to_string() {
         let reward = match trivia_question.difficulty {
             Difficulty::Easy => EASY_REWARD,
             Difficulty::Medium => MEDIUM_REWARD,
@@ -207,24 +212,4 @@ fn create_index_button(name: &str, emoji: ReactionType) -> CreateButton {
     b.style(ButtonStyle::Primary);
     b.emoji(emoji);
     b
-}
-
-fn index_to_string(index: usize) -> String {
-    match index {
-        1 => String::from("one"),
-        2 => String::from("two"),
-        3 => String::from("three"),
-        4 => String::from("four"),
-        _ => panic!("Invalid answer index"),
-    }
-}
-
-fn string_to_index(input: &str) -> usize {
-    match input {
-        "one" => 1,
-        "two" => 2,
-        "three" => 3,
-        "four" => 4,
-        _ => panic!("Invalid index"),
-    }
 }
