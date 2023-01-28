@@ -1,4 +1,5 @@
 mod commands;
+mod database;
 use crate::commands::info::*;
 use crate::commands::joke::*;
 use crate::commands::leaderboard::*;
@@ -13,6 +14,7 @@ use serenity::model::prelude::UserId;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::env;
+use std::path::Path;
 use std::sync::Arc;
 
 use serenity::framework::standard::{
@@ -39,8 +41,20 @@ impl TypeMapKey for ShardManagerContainer {
 struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         info!("Connected as {}", ready.user.name);
+        if Path::new("database.json").exists() {
+            info!("Loading database");
+            let mut gaurd = ctx.data.write().await;
+            let tokens = gaurd
+                .get_mut::<TokenCounter>()
+                .expect("Failed to load token count from context");
+            if let Ok(data) = database::load_data() {
+                tokens.extend(data.iter());
+            } else {
+                info!("Failed to load database");
+            }
+        }
     }
 
     async fn resume(&self, _: Context, _: ResumedEvent) {
@@ -137,13 +151,22 @@ async fn main() {
     }
 
     let shard_manager = client.shard_manager.clone();
+    {
+        let guard = client.data.clone();
 
-    tokio::spawn(async move {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("Could not register ctrl+c handler");
-        shard_manager.lock().await.shutdown_all().await;
-    });
+        tokio::spawn(async move {
+            tokio::signal::ctrl_c()
+                .await
+                .expect("Could not register ctrl+c handler");
+            shard_manager.lock().await.shutdown_all().await;
+            let lock = guard.read().await;
+            let token_count = lock
+                .get::<TokenCounter>()
+                .expect("Failed to get TokenCounter");
+
+            database::save_data(token_count.clone()).expect("Failed to save database on shutdown");
+        });
+    }
 
     if let Err(why) = client.start().await {
         error!("ERROR: start failed due to {:?}", why);
