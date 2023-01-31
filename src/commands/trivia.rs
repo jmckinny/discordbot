@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use crate::utils::tokens::*;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 use serenity::builder::CreateButton;
@@ -11,7 +12,6 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::MessageBuilder;
 
-use crate::TokenCounter;
 
 const API_URL: &str = "https://opentdb.com/api.php?amount=1&type=multiple";
 
@@ -88,16 +88,8 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
             Difficulty::Hard => HARD_REWARD,
         };
 
-        let mut data = ctx.data.write().await;
-        let token_counter = data
-            .get_mut::<TokenCounter>()
-            .expect("Expected TokenCounter in TypeMap");
+        add_tokens(ctx, msg.author.id, reward).await?;
 
-        if let Some(v) = token_counter.get_mut(&msg.author.id) {
-            *v += reward;
-        } else {
-            token_counter.insert(msg.author.id, reward);
-        }
         let reply = MessageBuilder::new()
             .push_line("That's correct!")
             .push_line(format!("You recieved {reward} tokens"))

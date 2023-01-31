@@ -1,5 +1,6 @@
 mod commands;
 mod database;
+mod utils;
 use crate::commands::info::*;
 use crate::commands::joke::*;
 use crate::commands::leaderboard::*;
