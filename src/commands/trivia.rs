@@ -12,7 +12,6 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::MessageBuilder;
 
-
 const API_URL: &str = "https://opentdb.com/api.php?amount=1&type=multiple";
 
 const EASY_REWARD: u64 = 1;
