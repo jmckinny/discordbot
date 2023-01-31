@@ -1,5 +1,4 @@
 mod commands;
-mod database;
 mod utils;
 use crate::commands::info::*;
 use crate::commands::joke::*;
@@ -9,6 +8,7 @@ use crate::commands::slots::*;
 use crate::commands::tokens::*;
 use crate::commands::trivia::*;
 use crate::commands::weather::*;
+use crate::utils::database;
 
 use dotenv::dotenv;
 use serenity::framework::standard::macros::help;
