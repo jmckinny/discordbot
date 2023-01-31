@@ -33,8 +33,11 @@ pub async fn slots(ctx: &Context, msg: &Message) -> CommandResult {
 
     let winnings = slot_machine.winnings();
     add_tokens(ctx, msg.author.id, winnings).await?;
-    msg.reply(&ctx, format!("You won {winnings} tokens!"))
-        .await?;
+    msg.reply(
+        &ctx,
+        format!("You spent {SLOTS_COST} tokens and won {winnings} tokens!"),
+    )
+    .await?;
 
     Ok(())
 }
