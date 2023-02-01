@@ -81,7 +81,7 @@ impl SlotMachine {
 
 impl std::fmt::Display for SlotMachine {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let slots = self.slots.join(" ");
+        let slots = self.slots.join("-");
         writeln!(f, "{slots}")?;
         Ok(())
     }
