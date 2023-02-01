@@ -70,9 +70,9 @@ impl SlotMachine {
         let matches = *counts.iter().max().unwrap();
 
         if matches >= 3 {
-            10
+            20
         } else if matches >= 4 {
-            25
+            60
         } else {
             0
         }
@@ -84,5 +84,21 @@ impl std::fmt::Display for SlotMachine {
         let slots = self.slots.join("-");
         writeln!(f, "{slots}")?;
         Ok(())
+    }
+}
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_slot_returns() {
+        let mut winnings = 0;
+        let iterations = 1000000;
+        for _ in 0..iterations {
+            let machine = SlotMachine::default();
+            winnings += machine.winnings();
+        }
+        let per_play = winnings as f64 / iterations as f64;
+        let expected_return_range = 4f64..4.3f64;
+        assert!(expected_return_range.contains(&per_play));
     }
 }
