@@ -26,8 +26,10 @@ pub async fn slots(ctx: &Context, msg: &Message) -> CommandResult {
     //Render slot machine
     msg.channel_id
         .send_message(&ctx, |m| {
-            m.content("🎰Slot Machine🎰");
-            m.reactions(slot_machine.slots.clone())
+            m.embed(|e| {
+                e.title("Slot Machine");
+                e.description(&slot_machine)
+            })
         })
         .await?;
 
@@ -43,17 +45,17 @@ pub async fn slots(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 struct SlotMachine {
-    slots: Vec<char>,
+    slots: Vec<String>,
 }
 
 impl SlotMachine {
     pub fn default() -> Self {
-        let emoji_list: Vec<char> = vec!['💀', '🤖', '💥', '🎱'];
+        let emoji_list: Vec<&str> = vec!["💀", "🤖", "💥", "🎱"];
 
         let mut rng = rand::thread_rng();
         let mut slots = Vec::new();
         for _ in 0..4 {
-            slots.push(*emoji_list.choose(&mut rng).unwrap());
+            slots.push(emoji_list.choose(&mut rng).unwrap().to_string());
         }
         SlotMachine { slots }
     }
@@ -74,5 +76,13 @@ impl SlotMachine {
         } else {
             0
         }
+    }
+}
+
+impl std::fmt::Display for SlotMachine {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let slots = self.slots.join(" ");
+        writeln!(f, "{slots}")?;
+        Ok(())
     }
 }
