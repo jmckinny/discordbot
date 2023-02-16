@@ -108,9 +108,3 @@ impl std::fmt::Display for GuessScore {
         Ok(())
     }
 }
-
-impl GuessScore {
-    pub fn get_data(&self) -> &Vec<LetterScore> {
-        &self.data
-    }
-}
