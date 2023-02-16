@@ -10,7 +10,7 @@ use serenity::prelude::*;
 
 #[command]
 pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
-    let solution = choose_word();
+    let solution = choose_word().await;
     let mut game_state = wordle::Game::new(&solution);
 
     while !game_state.is_game_over() {
@@ -68,9 +68,11 @@ async fn collect_response(ctx: &Context, msg: &Message) -> ResponseResult {
     Ok(None)
 }
 
-fn choose_word() -> String {
+async fn choose_word() -> String {
+    let wordlist = tokio::fs::read_to_string("wordlist.txt")
+        .await
+        .expect("Failed to load word list");
     let mut rng = rand::thread_rng();
-    let wordlist = std::fs::read_to_string("worldlist.txt").expect("Failed to load word list");
     let solution = wordlist.lines().choose(&mut rng).unwrap();
     solution.to_string()
 }
