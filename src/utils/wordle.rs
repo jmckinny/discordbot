@@ -30,8 +30,8 @@ impl Game {
         }
     }
 
-    pub fn guess(&mut self, guess: &str) -> Result<GuessScore, &str> {
-        if !is_valid_word(guess) {
+    pub async fn guess(&mut self, guess: &str) -> Result<GuessScore, &str> {
+        if !is_valid_word(guess).await {
             return Err("Invalid guess");
         }
         self.guess_left -= 1;
@@ -84,8 +84,10 @@ impl Game {
     }
 }
 
-pub fn is_valid_word(word: &str) -> bool {
-    let words = std::fs::read_to_string("wordlist.txt").unwrap();
+async fn is_valid_word(word: &str) -> bool {
+    let words = tokio::fs::read_to_string("wordlist.txt")
+        .await
+        .expect("Failed to read word list");
     for w in words.lines() {
         if word == w {
             return true;

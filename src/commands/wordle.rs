@@ -18,7 +18,7 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
         msg.reply(&ctx, guess_left_mssg).await?;
 
         if let Some(response) = collect_response(ctx, msg).await? {
-            match game_state.guess(&response) {
+            match game_state.guess(&response).await {
                 Ok(data) => {
                     msg.reply(ctx, format!("{}", data)).await?;
                 }
