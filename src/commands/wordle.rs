@@ -30,15 +30,13 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
                             letters_left.remove(letter);
                         }
                     }
+                    let mut mssg_letters = Vec::from_iter(letters_left.iter());
+                    mssg_letters.sort();
 
                     response
                         .reply(
                             ctx,
-                            format!(
-                                "{}\nRemaining letters: {:?}",
-                                data,
-                                Vec::from_iter(letters_left.iter()).sort()
-                            ),
+                            format!("{}\nRemaining letters: {:?}", data, mssg_letters),
                         )
                         .await?;
                 }
