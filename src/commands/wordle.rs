@@ -1,8 +1,9 @@
+use std::collections::HashSet;
 use std::sync::Arc;
 use std::time::Duration;
 
 use crate::utils::tokens::add_tokens;
-use crate::utils::wordle;
+use crate::utils::wordle::{self, Correctness};
 use rand::seq::IteratorRandom;
 use serenity::framework::standard::macros::command;
 use serenity::framework::standard::{CommandError, CommandResult};
@@ -15,6 +16,8 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
     let solution = choose_word().await;
     let mut game_state = wordle::Game::new(&solution);
 
+    let mut letters_left: HashSet<char> = HashSet::from_iter('a'..='z');
+
     while !game_state.is_game_over() {
         let guess_left_mssg = format!("Input guess {} of 6", 6 - game_state.guesses_left() + 1);
         msg.reply(&ctx, guess_left_mssg).await?;
@@ -22,7 +25,22 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
         if let Some(response) = collect_response(ctx, msg).await? {
             match game_state.guess(&response.content).await {
                 Ok(data) => {
-                    response.reply(ctx, format!("{}", data)).await?;
+                    for (letter, correctness) in data.get_data() {
+                        if let Correctness::Wrong = correctness {
+                            letters_left.remove(letter);
+                        }
+                    }
+
+                    response
+                        .reply(
+                            ctx,
+                            format!(
+                                "{}\nRemaining letters: {:?}",
+                                data,
+                                Vec::from_iter(letters_left.iter()).sort()
+                            ),
+                        )
+                        .await?;
                 }
                 Err(_) => {
                     response.reply(ctx, "Invalid guess!").await?;

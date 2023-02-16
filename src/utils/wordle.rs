@@ -14,7 +14,7 @@ pub enum Correctness {
     Wrong,
 }
 
-type LetterScore = (char, Correctness);
+pub type LetterScore = (char, Correctness);
 
 #[derive(Debug)]
 pub struct GuessScore {
@@ -106,5 +106,11 @@ impl std::fmt::Display for GuessScore {
             }
         }
         Ok(())
+    }
+}
+
+impl GuessScore {
+    pub fn get_data(&self) -> &Vec<LetterScore> {
+        &self.data
     }
 }
