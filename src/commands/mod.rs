@@ -6,3 +6,4 @@ pub mod slots;
 pub mod tokens;
 pub mod trivia;
 pub mod weather;
+pub mod wordle;

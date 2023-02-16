@@ -8,6 +8,7 @@ use crate::commands::slots::*;
 use crate::commands::tokens::*;
 use crate::commands::trivia::*;
 use crate::commands::weather::*;
+use crate::commands::wordle::*;
 use crate::utils::database;
 
 use dotenv::dotenv;
@@ -77,7 +78,7 @@ async fn my_help(
 }
 
 #[group]
-#[commands(ping, info, trivia, joke, weather, tokens, leaderboard, slots)]
+#[commands(ping, info, trivia, joke, weather, tokens, leaderboard, slots, wordle)]
 struct General;
 
 struct TokenCounter;
