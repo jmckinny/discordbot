@@ -8,6 +8,7 @@ use serenity::framework::standard::macros::command;
 use serenity::framework::standard::{CommandError, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use serenity::utils::MessageBuilder;
 
 #[command]
 pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
@@ -45,11 +46,11 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
         msg.reply(ctx, game_won_mssg).await?;
         add_tokens(ctx, msg.author.id, tokens_won as u64).await?;
     } else {
-        msg.reply(
-            ctx,
-            format!("You lost!  The correct word was '{}'", solution),
-        )
-        .await?;
+        let lose_mssg = MessageBuilder::new()
+            .push("You lost!  The correct word was ")
+            .push_bold(solution)
+            .build();
+        msg.reply(ctx, lose_mssg).await?;
     }
 
     Ok(())
