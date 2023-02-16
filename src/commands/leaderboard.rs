@@ -5,6 +5,7 @@ use serenity::prelude::*;
 use crate::TokenCounter;
 
 #[command]
+#[aliases("leaderboard", "l")]
 pub async fn leaderboard(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
     let token_counter = data
