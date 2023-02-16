@@ -100,9 +100,9 @@ impl std::fmt::Display for GuessScore {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (_, correctness) in self.data.iter() {
             match correctness {
-                Correctness::Correct => write!(f, "{}", "🟩")?,
-                Correctness::Misplaced => write!(f, "{}", "🟨")?,
-                Correctness::Wrong => write!(f, "{}", "🟥")?,
+                Correctness::Correct => write!(f, "🟩")?,
+                Correctness::Misplaced => write!(f, "🟨")?,
+                Correctness::Wrong => write!(f, "🟥")?,
             }
         }
         Ok(())
