@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use std::time::Duration;
 
 use crate::utils::tokens::add_tokens;
@@ -18,12 +19,12 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
         msg.reply(&ctx, guess_left_mssg).await?;
 
         if let Some(response) = collect_response(ctx, msg).await? {
-            match game_state.guess(&response).await {
+            match game_state.guess(&response.content).await {
                 Ok(data) => {
-                    msg.reply(ctx, format!("{}", data)).await?;
+                    response.reply(ctx, format!("{}", data)).await?;
                 }
                 Err(_) => {
-                    msg.reply(ctx, "Invalid guess!").await?;
+                    response.reply(ctx, "Invalid guess!").await?;
                     continue;
                 }
             }
@@ -54,7 +55,7 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
-type ResponseResult = Result<Option<String>, CommandError>;
+type ResponseResult = Result<Option<Arc<Message>>, CommandError>;
 
 async fn collect_response(ctx: &Context, msg: &Message) -> ResponseResult {
     if let Some(answer) = &msg
@@ -63,7 +64,7 @@ async fn collect_response(ctx: &Context, msg: &Message) -> ResponseResult {
         .timeout(Duration::from_secs(60))
         .await
     {
-        return Ok(Some(answer.content.to_lowercase()));
+        return Ok(Some(answer.clone()));
     }
     Ok(None)
 }
