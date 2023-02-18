@@ -44,7 +44,7 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
 
         let game_won_mssg = format!(
             "You won on try {}\nYou win {} tokens!",
-            6 - game_state.guesses_left() + 1,
+            6 - game_state.guesses_left(),
             tokens_won
         );
         msg.reply(ctx, game_won_mssg).await?;
