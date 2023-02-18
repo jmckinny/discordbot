@@ -30,7 +30,11 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
                 }
             }
         } else {
-            msg.reply(ctx, "Wordle game timed out!").await?;
+            let timeout_mssg = MessageBuilder::new()
+                .push("Wordle game timed out!  Word was ")
+                .push_bold(solution)
+                .build();
+            msg.reply(ctx, timeout_mssg).await?;
             return Ok(());
         }
     }
