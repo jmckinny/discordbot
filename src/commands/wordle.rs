@@ -12,7 +12,7 @@ use serenity::utils::MessageBuilder;
 
 #[command]
 pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
-    let solution = choose_word().await;
+    let solution = choose_solution().await;
     let mut game_state = wordle::Game::new(&solution);
 
     while !game_state.is_game_over() {
@@ -74,8 +74,8 @@ async fn collect_response(ctx: &Context, msg: &Message) -> ResponseResult {
     Ok(None)
 }
 
-async fn choose_word() -> String {
-    let wordlist = tokio::fs::read_to_string("wordlist.txt")
+async fn choose_solution() -> String {
+    let wordlist = tokio::fs::read_to_string("solutions.txt")
         .await
         .expect("Failed to load word list");
     let mut rng = rand::thread_rng();
