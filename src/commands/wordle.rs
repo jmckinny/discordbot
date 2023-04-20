@@ -66,7 +66,7 @@ async fn collect_response(ctx: &Context, msg: &Message) -> ResponseResult {
     if let Some(answer) = &msg
         .author
         .await_reply(ctx)
-        .timeout(Duration::from_secs(60))
+        .timeout(Duration::from_secs(60 * 2))
         .await
     {
         return Ok(Some(answer.clone()));
