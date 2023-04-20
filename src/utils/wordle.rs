@@ -52,13 +52,20 @@ impl Game {
                 if *freq > 0 {
                     if self.solution.chars().nth(i).unwrap() == letter {
                         correctness.push((letter, Correctness::Correct));
+                        *freq = freq.checked_sub(1).unwrap_or(0);
                     } else {
-                        correctness.push((letter, Correctness::Misplaced));
+                        if self.later_correct(letter, i) > 0
+                            && guess.chars().skip(i + 1).filter(|c| *c == letter).count() > 0
+                        {
+                            correctness.push((letter, Correctness::Wrong));
+                        } else {
+                            correctness.push((letter, Correctness::Misplaced));
+                            *freq = freq.checked_sub(1).unwrap_or(0);
+                        }
                     }
                 } else {
                     correctness.push((letter, Correctness::Wrong));
                 }
-                *freq = freq.checked_sub(1).unwrap_or(0);
             } else {
                 correctness.push((letter, Correctness::Wrong));
             }
@@ -69,6 +76,16 @@ impl Game {
         }
 
         Ok(GuessScore { data: correctness })
+    }
+
+    fn later_correct(&self, letter: char, index: usize) -> usize {
+        let mut result = 0;
+        for c in self.solution.chars().skip(index + 1) {
+            if c == letter {
+                result += 1;
+            }
+        }
+        result
     }
 
     pub fn is_game_over(&self) -> bool {

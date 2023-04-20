@@ -16,3 +16,6 @@ serde_json = "1.0"
 tracing-subscriber = "0.2"
 html-escape = "0.2.13"
 rand = "0.8.5"
+
+[dev-dependencies]
+tokio-test = "*"

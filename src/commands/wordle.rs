@@ -82,3 +82,58 @@ async fn choose_solution() -> String {
     let solution = wordlist.lines().choose(&mut rng).unwrap();
     solution.to_string()
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_koala() {
+        let guess = "koala";
+        let solution = "vodka";
+        let mut game = wordle::Game::new(solution);
+
+        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        assert_eq!(response.to_string(), "🟨🟩🟥🟥🟩")
+    }
+
+    #[test]
+    fn test_generic() {
+        let guess = "crane";
+        let solution = "thorn";
+        let mut game = wordle::Game::new(solution);
+
+        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        assert_eq!(response.to_string(), "🟥🟨🟥🟨🟥")
+    }
+
+    #[test]
+    fn test_generic2() {
+        let guess = "apple";
+        let solution = "pains";
+        let mut game = wordle::Game::new(solution);
+
+        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        assert_eq!(response.to_string(), "🟨🟨🟥🟥🟥")
+    }
+
+    #[test]
+    fn test_generic3() {
+        let guess = "koala";
+        let solution = "raise";
+        let mut game = wordle::Game::new(solution);
+
+        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        assert_eq!(response.to_string(), "🟥🟥🟨🟥🟥")
+    }
+
+    #[test]
+    fn test_generic4() {
+        let guess = "leeks";
+        let solution = "still";
+        let mut game = wordle::Game::new(solution);
+
+        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        assert_eq!(response.to_string(), "🟨🟥🟥🟥🟨")
+    }
+}
