@@ -53,15 +53,13 @@ impl Game {
                     if self.solution.chars().nth(i).unwrap() == letter {
                         correctness.push((letter, Correctness::Correct));
                         *freq = freq.checked_sub(1).unwrap_or(0);
+                    } else if self.later_correct(letter, i) > 0
+                        && guess.chars().skip(i + 1).filter(|c| *c == letter).count() > 0
+                    {
+                        correctness.push((letter, Correctness::Wrong));
                     } else {
-                        if self.later_correct(letter, i) > 0
-                            && guess.chars().skip(i + 1).filter(|c| *c == letter).count() > 0
-                        {
-                            correctness.push((letter, Correctness::Wrong));
-                        } else {
-                            correctness.push((letter, Correctness::Misplaced));
-                            *freq = freq.checked_sub(1).unwrap_or(0);
-                        }
+                        correctness.push((letter, Correctness::Misplaced));
+                        *freq = freq.checked_sub(1).unwrap_or(0);
                     }
                 } else {
                     correctness.push((letter, Correctness::Wrong));
