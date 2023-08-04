@@ -30,7 +30,11 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
                     response
                         .reply(
                             ctx,
-                            format!("{}\n{}", data, format_keyboard_left(&letters_left)),
+                            format!(
+                                "{}\n{}",
+                                data,
+                                format_keyboard_left(&letters_left, &solution)
+                            ),
                         )
                         .await?;
                 }
@@ -91,14 +95,17 @@ async fn choose_solution() -> String {
     solution.to_string()
 }
 
-fn format_keyboard_left(letters_used: &HashSet<char>) -> String {
+fn format_keyboard_left(letters_used: &HashSet<char>, solution: &str) -> String {
     const LETTERS: [char; 26] = [
         'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K',
         'L', 'Z', 'X', 'C', 'V', 'B', 'N', 'M',
     ];
     let mut output = String::new();
     for (i, letter) in LETTERS.iter().enumerate() {
-        if letters_used.contains(letter) {
+        let lower: String = letter.to_lowercase().collect();
+        if letters_used.contains(&letter) && solution.contains(&lower) {
+            output.push_str(&format!(" {letter} "));
+        } else if letters_used.contains(&letter) {
             output.push_str(&format!(" ~~{letter}~~ "));
         } else {
             output.push_str(&format!(" **{letter}** "));
