@@ -100,9 +100,7 @@ impl Game {
 }
 
 async fn is_valid_word(word: &str) -> bool {
-    let words = tokio::fs::read_to_string("data/wordlist.txt")
-        .await
-        .expect("Failed to read word list");
+    let words = include_str!("../../data/wordlist.txt");
     for w in words.lines() {
         if word == w {
             return true;

@@ -85,9 +85,7 @@ async fn collect_response(ctx: &Context, msg: &Message) -> ResponseResult {
 }
 
 async fn choose_solution() -> String {
-    let wordlist = tokio::fs::read_to_string("data/solutions.txt")
-        .await
-        .expect("Failed to load word list");
+    let wordlist = include_str!("../../data/solutions.txt");
     let mut rng = rand::thread_rng();
     let solution = wordlist.lines().choose(&mut rng).unwrap();
     solution.to_string()
