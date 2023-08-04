@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -14,6 +15,7 @@ use serenity::utils::MessageBuilder;
 pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
     let solution = choose_solution().await;
     let mut game_state = wordle::Game::new(&solution);
+    let mut letters_left = HashSet::new();
 
     while !game_state.is_game_over() {
         let guess_left_mssg = format!("Input guess {} of 6", 6 - game_state.guesses_left() + 1);
@@ -22,7 +24,15 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
         if let Some(response) = collect_response(ctx, msg).await? {
             match game_state.guess(&response.content).await {
                 Ok(data) => {
-                    response.reply(ctx, format!("{}", data)).await?;
+                    let lower_letters = response.content.to_uppercase();
+                    let chars_used = lower_letters.chars();
+                    letters_left.extend(chars_used);
+                    response
+                        .reply(
+                            ctx,
+                            format!("{}\n{}", data, format_keyboard_left(&letters_left)),
+                        )
+                        .await?;
                 }
                 Err(_) => {
                     response.reply(ctx, "Invalid guess!").await?;
@@ -81,6 +91,29 @@ async fn choose_solution() -> String {
     let mut rng = rand::thread_rng();
     let solution = wordlist.lines().choose(&mut rng).unwrap();
     solution.to_string()
+}
+
+fn format_keyboard_left(letters_used: &HashSet<char>) -> String {
+    const LETTERS: [char; 26] = [
+        'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K',
+        'L', 'Z', 'X', 'C', 'V', 'B', 'N', 'M',
+    ];
+    let mut output = String::new();
+    for (i, letter) in LETTERS.iter().enumerate() {
+        if letters_used.contains(letter) {
+            output.push_str(&format!(" ~~{letter}~~ "));
+        } else {
+            output.push_str(&format!(" **{letter}** "));
+        }
+        match i {
+            // Querty top layer is 10 keys long (10-1 == 9)
+            9 => output.push('\n'),
+            // Querty second layer is 9 (9 + 9 == 18)
+            18 => output.push_str("\n   "),
+            _ => continue,
+        }
+    }
+    output
 }
 
 #[cfg(test)]
