@@ -103,12 +103,13 @@ fn format_keyboard_left(letters_used: &HashSet<char>, solution: &str) -> String 
     let mut output = String::new();
     for (i, letter) in LETTERS.iter().enumerate() {
         let lower: String = letter.to_lowercase().collect();
-        if letters_used.contains(&letter) && solution.contains(&lower) {
-            output.push_str(&format!(" {letter} "));
-        } else if letters_used.contains(&letter) {
+
+        if letters_used.contains(letter) && solution.contains(&lower) {
+            output.push_str(&format!(" **{letter}** "));
+        } else if letters_used.contains(letter) {
             output.push_str(&format!(" ~~{letter}~~ "));
         } else {
-            output.push_str(&format!(" **{letter}** "));
+            output.push_str(&format!(" {letter} "));
         }
         match i {
             // Querty top layer is 10 keys long (10-1 == 9)
