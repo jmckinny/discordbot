@@ -4,5 +4,5 @@ A basic discord bot build with [serenity](https://github.com/serenity-rs/serenit
 ## Features
 - Trivia pulled from [opentdb](https://opentdb.com/)
 - Token currency system with leaderboard
-- Weather using the [national weather service API](https://www.weather.gov/documentation/services-web-api)
+- Weather from [wttr.in](https://wttr.in/)
 - Jokes pulled from [icanhazdadjoke](https://icanhazdadjoke.com/api)

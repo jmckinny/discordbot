@@ -5,41 +5,22 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::MessageBuilder;
 
-const COLLEGE_PARK_WEATHER_API: &str = "https://api.weather.gov/gridpoints/LWX/99,76/forecast";
+const WTTR_WEATHER_API: &str = "https://wttr.in/";
 const BOT_USER_AGENT: &str = "frothybot (https://github.com/jmckinny/frothybot)";
 
 #[command]
 pub async fn weather(ctx: &Context, msg: &Message) -> CommandResult {
     let client = reqwest::Client::new();
+    let req_url = format!("{}Silver+Spring", WTTR_WEATHER_API);
     let response = client
-        .get(COLLEGE_PARK_WEATHER_API)
+        .get(req_url)
         .header(USER_AGENT, BOT_USER_AGENT)
         .send()
         .await?;
-    let json_response: Value = response.json().await?;
-
-    let current_period = &json_response["properties"]["periods"][0];
-
-    let temprature = &current_period["temperature"];
-    let temperature_unit = &current_period["temperatureUnit"]
-        .to_string()
-        .replace('"', "");
-    let forecast = &current_period["shortForecast"].to_string().replace('"', "");
-    let icon_url = &current_period["icon"].to_string().replace('"', "");
-
-    let weather_message = MessageBuilder::new()
-        .push_line("Weather for College Park MD")
-        .push_bold_line(format!("{temprature}°{temperature_unit} {forecast}"))
-        .build();
+    let content = response.text().await?;
 
     msg.channel_id
-        .send_message(&ctx, |m| {
-            m.add_embed(|e| {
-                e.image(icon_url);
-                e.title("Weather");
-                e.field(weather_message, "", false)
-            })
-        })
+        .send_message(&ctx, |m| m.content(content))
         .await?;
     Ok(())
 }
