@@ -29,12 +29,13 @@ pub async fn trivia(ctx: Context<'_>) -> Result<(), Error> {
     ];
     let row = CreateActionRow::Buttons(buttons);
     let components = vec![row];
-    ctx.send(
-        CreateReply::default()
-            .content(&trivia_question.formated_message)
-            .components(components),
-    )
-    .await?;
+    let trivia_message = ctx
+        .send(
+            CreateReply::default()
+                .content(&trivia_question.formated_message)
+                .components(components),
+        )
+        .await?;
     let resp = serenity::ComponentInteractionCollector::new(ctx)
         .timeout(Duration::from_secs(10))
         .channel_id(ctx.channel_id())
@@ -47,7 +48,14 @@ pub async fn trivia(ctx: Context<'_>) -> Result<(), Error> {
             .push(trivia_question.correct_answer)
             .build();
         ctx.reply(timeout_msg).await?;
-
+        trivia_message
+            .edit(
+                ctx,
+                CreateReply::default()
+                    .content(&trivia_question.formated_message)
+                    .components(vec![]),
+            )
+            .await?;
         return Ok(());
     }
 
