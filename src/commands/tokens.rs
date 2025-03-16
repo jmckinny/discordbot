@@ -1,16 +1,15 @@
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
-
+use crate::commands::types::{Context, Error};
 use crate::utils::tokens::get_tokens;
+use poise::serenity_prelude as serenity;
 
-#[command]
-#[aliases("token", "t")]
-pub async fn tokens(ctx: &Context, msg: &Message) -> CommandResult {
-    if let Some(tokens) = get_tokens(ctx, msg.author.id).await? {
-        msg.reply(&ctx, format!("You have {tokens} tokens")).await?;
-    } else {
-        msg.reply(&ctx, "You have no tokens").await?;
-    }
+#[poise::command(slash_command, prefix_command)]
+pub async fn tokens(
+    ctx: Context<'_>,
+    #[description = "Selected user"] user: Option<serenity::User>,
+) -> Result<(), Error> {
+    let u = user.as_ref().unwrap_or_else(|| ctx.author());
+    let tokens = get_tokens(ctx, u);
+    let response = format!("You have {tokens} tokens");
+    ctx.say(response).await?;
     Ok(())
 }

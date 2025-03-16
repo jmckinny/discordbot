@@ -1,12 +1,11 @@
+use crate::commands::types::{Context, Error};
 use reqwest::header::{ACCEPT, USER_AGENT};
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
 
 const JOKE_API_URL: &str = "https://icanhazdadjoke.com/";
 const USER_AGENT_STRING: &str = "frothybot (https://github.com/jmckinny/frothybot)";
-#[command]
-pub async fn joke(ctx: &Context, msg: &Message) -> CommandResult {
+
+#[poise::command(slash_command, prefix_command)]
+pub async fn joke(ctx: Context<'_>) -> Result<(), Error> {
     let client = reqwest::Client::new();
     let response = client
         .get(JOKE_API_URL)
@@ -14,6 +13,7 @@ pub async fn joke(ctx: &Context, msg: &Message) -> CommandResult {
         .header(ACCEPT, "text/plain")
         .send()
         .await?;
-    msg.reply(&ctx.http, response.text().await?).await?;
+    let mssg = response.text().await?;
+    ctx.reply(mssg).await?;
     Ok(())
 }
