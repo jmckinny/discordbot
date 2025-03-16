@@ -8,6 +8,7 @@ use crate::commands::joke::joke;
 use crate::commands::leaderboard::leaderboard;
 use crate::commands::slots::slots;
 use crate::commands::tokens::tokens;
+use crate::commands::trivia::trivia;
 use crate::commands::weather::weather;
 use crate::commands::wordle::wordle;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
@@ -52,6 +53,7 @@ async fn main() {
                 slots(),
                 weather(),
                 wordle(),
+                trivia(),
             ],
             prefix_options,
             ..Default::default()

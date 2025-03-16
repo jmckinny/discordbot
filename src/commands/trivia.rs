@@ -1,15 +1,13 @@
+use crate::commands::types::{Context, Error};
 use std::time::Duration;
 
 use crate::utils::tokens::*;
+use ::serenity::all::EditMessage;
+use poise::{CreateReply, serenity_prelude as serenity};
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
+use serenity::all::{ButtonStyle, CreateActionRow, CreateMessage, ReactionType};
 use serenity::builder::CreateButton;
-use serenity::framework::standard::macros::command;
-use serenity::framework::standard::CommandResult;
-use serenity::model::application::component::ButtonStyle;
-use serenity::model::prelude::interaction::InteractionResponseType::UpdateMessage;
-use serenity::model::prelude::*;
-use serenity::prelude::*;
 use serenity::utils::MessageBuilder;
 
 const API_URL: &str = "https://opentdb.com/api.php?amount=1&type=multiple";
@@ -18,66 +16,62 @@ const EASY_REWARD: u64 = 1;
 const MEDIUM_REWARD: u64 = 3;
 const HARD_REWARD: u64 = 5;
 
-#[command]
-pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
+#[poise::command(slash_command, prefix_command)]
+pub async fn trivia(ctx: Context<'_>) -> Result<(), Error> {
     let response: Response = serde_json::from_str(&reqwest::get(API_URL).await?.text().await?)?;
     let trivia_question = response.to_message();
 
-    let m = msg
-        .channel_id
-        .send_message(&ctx, |m| {
-            m.content(&trivia_question.formated_message);
-            m.components(|c| {
-                c.create_action_row(|row| {
-                    row.add_button(create_index_button("1", "1️⃣".parse().unwrap()));
-                    row.add_button(create_index_button("2", "2️⃣".parse().unwrap()));
-                    row.add_button(create_index_button("3", "3️⃣".parse().unwrap()));
-                    row.add_button(create_index_button("4", "4️⃣".parse().unwrap()))
-                })
-            })
-        })
-        .await?;
-    let user = msg.author.id;
-    let interaction = match m
-        .await_component_interaction(ctx)
-        .filter(move |f| f.user.id == user)
+    let buttons = vec![
+        (create_index_button("1", "1️⃣".parse().unwrap())),
+        (create_index_button("2", "2️⃣".parse().unwrap())),
+        (create_index_button("3", "3️⃣".parse().unwrap())),
+        (create_index_button("4", "4️⃣".parse().unwrap())),
+    ];
+    let row = CreateActionRow::Buttons(buttons);
+    let components = vec![row];
+    ctx.send(
+        CreateReply::default()
+            .content(&trivia_question.formated_message)
+            .components(components),
+    )
+    .await?;
+    let resp = serenity::ComponentInteractionCollector::new(ctx)
         .timeout(Duration::from_secs(10))
-        .await
-    {
-        Some(x) => x,
-        None => {
-            let timeout_msg = MessageBuilder::new()
-                .push_line("Timed out!")
-                .push("Correct answer was: ")
-                .push(trivia_question.correct_answer)
-                .build();
-            msg.reply(&ctx, timeout_msg).await?;
-            return Ok(());
-        }
-    };
+        .channel_id(ctx.channel_id())
+        .await;
 
-    let answer = &interaction.data.custom_id;
+    if resp.is_none() {
+        let timeout_msg = MessageBuilder::new()
+            .push_line("Timed out!")
+            .push("Correct answer was: ")
+            .push(trivia_question.correct_answer)
+            .build();
+        ctx.reply(timeout_msg).await?;
 
-    interaction
-        .create_interaction_response(&ctx, |r| {
-            r.kind(UpdateMessage).interaction_response_data(|d| {
-                d.content(
-                    MessageBuilder::new()
-                        .push_line(trivia_question.formated_message)
-                        .push_line("")
-                        .push(&msg.author.name)
-                        .push(" answered: ")
-                        .push_bold(
-                            &trivia_question.all_answers[answer
-                                .parse::<usize>()
-                                .expect("Attempted to parse invalid index")
-                                - 1],
-                        )
-                        .build(),
-                );
-                d.components(|c| c)
-            })
-        })
+        return Ok(());
+    }
+
+    let mci = resp.unwrap();
+    let answer = &mci.data.custom_id;
+
+    let mut original_msg = mci.message.clone();
+    let msg_data = MessageBuilder::new()
+        .push_line(trivia_question.formated_message)
+        .push_line("")
+        .push(&ctx.author().name)
+        .push(" answered: ")
+        .push_bold(
+            &trivia_question.all_answers[answer
+                .parse::<usize>()
+                .expect("Attempted to parse invalid index")
+                - 1],
+        )
+        .build();
+    original_msg
+        .edit(ctx, EditMessage::new().content(msg_data).components(vec![]))
+        .await?;
+
+    mci.create_response(ctx, serenity::CreateInteractionResponse::Acknowledge)
         .await?;
 
     if answer == &trivia_question.correct_index.to_string() {
@@ -87,20 +81,20 @@ pub async fn trivia(ctx: &Context, msg: &Message) -> CommandResult {
             Difficulty::Hard => HARD_REWARD,
         };
 
-        add_tokens(ctx, msg.author.id, reward).await?;
+        add_tokens(ctx, ctx.author(), reward)?;
 
         let reply = MessageBuilder::new()
             .push_line("That's correct!")
             .push_line(format!("You recieved {reward} tokens"))
             .build();
-        msg.reply(ctx, reply).await?;
+        ctx.reply(reply).await?;
     } else {
         let response = MessageBuilder::new()
             .push_line("Wrong.")
             .push("The correct answer was: ")
             .push(trivia_question.correct_answer)
             .build();
-        msg.reply(ctx, response).await?;
+        ctx.reply(response).await?;
     }
 
     Ok(())
@@ -197,10 +191,9 @@ impl Response {
 }
 
 fn create_index_button(name: &str, emoji: ReactionType) -> CreateButton {
-    let mut b = CreateButton::default();
-    b.custom_id(name);
-    b.label("");
-    b.style(ButtonStyle::Primary);
-    b.emoji(emoji);
-    b
+    CreateButton::new(name)
+        .custom_id(name)
+        .label("")
+        .style(ButtonStyle::Primary)
+        .emoji(emoji)
 }
