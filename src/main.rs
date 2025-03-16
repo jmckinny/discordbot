@@ -72,7 +72,6 @@ async fn main() {
             .expect("Could not register ctrl+c handler");
         shard_manager.shutdown_all().await;
         let token_data = token_ref
-            .clone()
             .read()
             .expect("Failed to aquire token read lock")
             .clone();
