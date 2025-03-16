@@ -1,55 +1,60 @@
+use crate::commands::types::{Context, Error};
 use std::collections::HashSet;
-use std::sync::Arc;
 use std::time::Duration;
 
 use crate::utils::tokens::add_tokens;
-use crate::utils::wordle::{self};
+use crate::utils::wordle;
 use rand::seq::IteratorRandom;
-use serenity::framework::standard::macros::command;
-use serenity::framework::standard::{CommandError, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
-use serenity::utils::MessageBuilder;
+use serenity::all::MessageBuilder;
+use serenity::collector::MessageCollector;
 
-#[command]
-pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
+#[poise::command(slash_command, prefix_command)]
+pub async fn wordle(ctx: Context<'_>) -> Result<(), Error> {
     let solution = choose_solution().await;
     let mut game_state = wordle::Game::new(&solution);
     let mut letters_left = HashSet::new();
 
-    while !game_state.is_game_over() {
-        let guess_left_mssg = format!("Input guess {} of 6", 6 - game_state.guesses_left() + 1);
-        msg.reply(&ctx, guess_left_mssg).await?;
+    let guess_left_mssg = format!("Input guess {} of 6", 6 - game_state.guesses_left() + 1);
+    ctx.reply(guess_left_mssg).await?;
+    let author_id = ctx.author().id;
 
-        if let Some(response) = collect_response(ctx, msg).await? {
-            match game_state.guess(&response.content).await {
-                Ok(data) => {
-                    let lower_letters = response.content.to_uppercase();
-                    let chars_used = lower_letters.chars();
-                    letters_left.extend(chars_used);
-                    response
-                        .reply(
-                            ctx,
-                            format!(
-                                "{}\n{}",
-                                data,
-                                format_keyboard_left(&letters_left, &solution)
-                            ),
-                        )
-                        .await?;
-                }
-                Err(_) => {
-                    response.reply(ctx, "Invalid guess!").await?;
-                    continue;
-                }
-            }
-        } else {
+    loop {
+        // Message listen loop
+        let msg_collector = MessageCollector::new(ctx)
+            .filter(move |m| m.author.id == author_id)
+            .timeout(Duration::from_secs(60 * 2));
+        let response = msg_collector.next().await;
+
+        if response.is_none() {
             let timeout_mssg = MessageBuilder::new()
                 .push("Wordle game timed out!  Word was ")
                 .push_bold(solution)
                 .build();
-            msg.reply(ctx, timeout_mssg).await?;
+            ctx.reply(timeout_mssg).await?;
             return Ok(());
+        }
+
+        let response_msg = response.expect("Unreachable");
+        match game_state.guess(&response_msg.content).await {
+            Ok(score) => {
+                let lower_letters = response_msg.content.to_uppercase();
+                let chars_used = lower_letters.chars();
+                letters_left.extend(chars_used);
+                let msg = format!(
+                    "{}\n{}",
+                    score,
+                    format_keyboard_left(&letters_left, &solution)
+                );
+                response_msg.reply(&ctx, msg).await?;
+            }
+            Err(_) => {
+                ctx.reply("Invalid guess!").await?;
+                continue;
+            }
+        }
+
+        if game_state.is_game_over() {
+            break;
         }
     }
 
@@ -61,36 +66,22 @@ pub async fn wordle(ctx: &Context, msg: &Message) -> CommandResult {
             6 - game_state.guesses_left(),
             tokens_won
         );
-        msg.reply(ctx, game_won_mssg).await?;
-        add_tokens(ctx, msg.author.id, tokens_won as u64).await?;
+        ctx.reply(game_won_mssg).await?;
+        add_tokens(ctx, ctx.author(), tokens_won as u64)?;
     } else {
         let lose_mssg = MessageBuilder::new()
             .push("You lost!  The correct word was ")
             .push_bold(solution)
             .build();
-        msg.reply(ctx, lose_mssg).await?;
+        ctx.reply(lose_mssg).await?;
     }
 
     Ok(())
 }
 
-type ResponseResult = Result<Option<Arc<Message>>, CommandError>;
-
-async fn collect_response(ctx: &Context, msg: &Message) -> ResponseResult {
-    if let Some(answer) = &msg
-        .author
-        .await_reply(ctx)
-        .timeout(Duration::from_secs(60 * 2))
-        .await
-    {
-        return Ok(Some(answer.clone()));
-    }
-    Ok(None)
-}
-
 async fn choose_solution() -> String {
     let wordlist = include_str!("../../data/solutions.txt");
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let solution = wordlist.lines().choose(&mut rng).unwrap();
     solution.to_string()
 }

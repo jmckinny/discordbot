@@ -6,4 +6,4 @@ pub mod tokens;
 // pub mod trivia;
 pub mod types;
 pub mod weather;
-// pub mod wordle;
+pub mod wordle;

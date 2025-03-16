@@ -9,6 +9,7 @@ use crate::commands::leaderboard::leaderboard;
 use crate::commands::slots::slots;
 use crate::commands::tokens::tokens;
 use crate::commands::weather::weather;
+use crate::commands::wordle::wordle;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 
 use ::serenity::all::UserId;
@@ -43,7 +44,15 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![info(), tokens(), joke(), leaderboard(), slots(), weather()],
+            commands: vec![
+                info(),
+                tokens(),
+                joke(),
+                leaderboard(),
+                slots(),
+                weather(),
+                wordle(),
+            ],
             prefix_options,
             ..Default::default()
         })

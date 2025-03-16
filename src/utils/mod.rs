@@ -1,3 +1,3 @@
 pub mod database;
 pub mod tokens;
-// pub mod wordle;
+pub mod wordle;
