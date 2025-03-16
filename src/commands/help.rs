@@ -15,8 +15,8 @@ pub async fn help(
         };
     }
     let extra_text_at_bottom = "\
-Type `?help command` for more info on a command.
-You can edit your `?help` message to the bot and the bot will edit its response.";
+Type `!help command` for more info on a command.
+You can edit your `!help` message to the bot and the bot will edit its response.";
 
     let config = HelpConfiguration {
         show_subcommands: true,
