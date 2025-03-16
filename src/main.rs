@@ -12,7 +12,7 @@ use crate::utils::database::load_data;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 
 use ::serenity::all::UserId;
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use std::sync::{Arc, RwLock};
 use tracing::info;
 
