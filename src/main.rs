@@ -8,13 +8,13 @@ use crate::commands::joke::joke;
 use crate::commands::leaderboard::leaderboard;
 use crate::commands::slots::slots;
 use crate::commands::tokens::tokens;
-use crate::utils::database::load_data;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 
 use ::serenity::all::UserId;
 use dotenvy::dotenv;
 use std::sync::{Arc, RwLock};
-use tracing::info;
+use tracing::{error, info};
+use utils::database;
 
 pub type Token = u64;
 pub type TokenCounter = HashMap<UserId, Token>;
@@ -36,6 +36,10 @@ async fn main() {
         ..Default::default()
     };
 
+    let token_data = database::load_data().unwrap_or_default();
+    let token_ref = Arc::new(RwLock::new(token_data));
+    let token_ref_setup = token_ref.clone();
+
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![info(), tokens(), joke(), leaderboard(), slots()],
@@ -45,17 +49,36 @@ async fn main() {
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                let token_data = load_data().unwrap_or_default();
-                let tokens = Arc::new(RwLock::new(token_data));
-                let data = Data { tokens };
+                let data = Data {
+                    tokens: token_ref_setup,
+                };
                 Ok(data)
             })
         })
         .build();
 
-    let client = serenity::ClientBuilder::new(token, intents)
+    let mut client = serenity::ClientBuilder::new(token, intents)
         .framework(framework)
-        .await;
+        .await
+        .expect("Failed to create client");
+
+    let shard_manager = client.shard_manager.clone();
+
+    tokio::spawn(async move {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("Could not register ctrl+c handler");
+        shard_manager.shutdown_all().await;
+        let token_data = token_ref
+            .clone()
+            .read()
+            .expect("Failed to aquire token read lock")
+            .clone();
+        database::save_data(token_data).expect("Failed to save database");
+    });
+
     info!("Starting client!");
-    client.unwrap().start().await.unwrap();
+    if let Err(why) = client.start().await {
+        error!("ERROR: start failed due to {:?}", why);
+    }
 }
