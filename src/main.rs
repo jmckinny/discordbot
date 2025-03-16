@@ -65,6 +65,8 @@ async fn main() {
     let shard_manager = client.shard_manager.clone();
 
     tokio::spawn(async move {
+        // TODO: use a real database and not
+        // only save on quit
         tokio::signal::ctrl_c()
             .await
             .expect("Could not register ctrl+c handler");
