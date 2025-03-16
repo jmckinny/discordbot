@@ -11,13 +11,14 @@ use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 
 use ::serenity::all::UserId;
 use dotenv::dotenv;
+use std::sync::{Arc, RwLock};
 use tracing::info;
 
 pub type Token = u64;
 pub type TokenCounter = HashMap<UserId, Token>;
 
 pub struct Data {
-    tokens: TokenCounter,
+    tokens: Arc<RwLock<TokenCounter>>,
 } // User data, which is stored and accessible in all command invocations
 
 #[tokio::main]
@@ -25,7 +26,8 @@ async fn main() {
     dotenv().ok();
     tracing_subscriber::fmt::init();
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
-    let intents = serenity::GatewayIntents::non_privileged();
+    let intents =
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let prefix_options = PrefixFrameworkOptions {
         prefix: Some(String::from("!")),
@@ -41,7 +43,8 @@ async fn main() {
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                let tokens = load_data().unwrap_or_default();
+                let token_data = load_data().unwrap_or_default();
+                let tokens = Arc::new(RwLock::new(token_data));
                 let data = Data { tokens };
                 Ok(data)
             })
