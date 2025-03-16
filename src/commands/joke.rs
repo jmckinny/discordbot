@@ -4,6 +4,7 @@ use reqwest::header::{ACCEPT, USER_AGENT};
 const JOKE_API_URL: &str = "https://icanhazdadjoke.com/";
 const USER_AGENT_STRING: &str = "frothybot (https://github.com/jmckinny/frothybot)";
 
+/// Tell the user a joke
 #[poise::command(slash_command, prefix_command)]
 pub async fn joke(ctx: Context<'_>) -> Result<(), Error> {
     let client = reqwest::Client::new();

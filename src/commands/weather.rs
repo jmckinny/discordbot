@@ -7,6 +7,7 @@ use serenity::all::{CreateEmbed, MessageBuilder};
 const COLLEGE_PARK_WEATHER_API: &str = "https://api.weather.gov/gridpoints/LWX/99,76/forecast";
 const BOT_USER_AGENT: &str = "frothybot (https://github.com/jmckinny/frothybot)";
 
+/// Get current weather
 #[poise::command(slash_command, prefix_command)]
 pub async fn weather(ctx: Context<'_>) -> Result<(), Error> {
     let client = reqwest::Client::new();

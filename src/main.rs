@@ -3,6 +3,7 @@ mod utils;
 
 use std::collections::HashMap;
 
+use crate::commands::help::help;
 use crate::commands::info::info;
 use crate::commands::joke::joke;
 use crate::commands::leaderboard::leaderboard;
@@ -54,6 +55,7 @@ async fn main() {
                 weather(),
                 wordle(),
                 trivia(),
+                help(),
             ],
             prefix_options,
             ..Default::default()

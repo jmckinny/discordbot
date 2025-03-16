@@ -8,6 +8,7 @@ use rand::seq::IteratorRandom;
 use serenity::all::MessageBuilder;
 use serenity::collector::MessageCollector;
 
+/// Start a wordle game
 #[poise::command(slash_command, prefix_command)]
 pub async fn wordle(ctx: Context<'_>) -> Result<(), Error> {
     let solution = choose_solution().await;

@@ -6,6 +6,7 @@ use serenity::all::CreateEmbed;
 
 const SLOTS_COST: u64 = 5;
 
+/// Play the slot machine
 #[poise::command(slash_command, prefix_command)]
 pub async fn slots(ctx: Context<'_>) -> Result<(), Error> {
     let user = ctx.author();

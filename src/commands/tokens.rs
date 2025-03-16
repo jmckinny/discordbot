@@ -2,6 +2,7 @@ use crate::commands::types::{Context, Error};
 use crate::utils::tokens::get_tokens;
 use poise::serenity_prelude as serenity;
 
+/// Query the number of tokens a user has
 #[poise::command(slash_command, prefix_command)]
 pub async fn tokens(
     ctx: Context<'_>,
