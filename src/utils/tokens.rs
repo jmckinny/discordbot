@@ -25,11 +25,7 @@ pub fn get_tokens(ctx: Context<'_>, user: &serenity::User) -> Token {
     let token_count = token_count.get(&user.id);
     *token_count.unwrap_or(&0u64)
 }
-pub async fn add_tokens(
-    ctx: Context<'_>,
-    user: &serenity::User,
-    amount: Token,
-) -> Result<Token, Error> {
+pub fn add_tokens(ctx: Context<'_>, user: &serenity::User, amount: Token) -> Result<Token, Error> {
     let data = ctx.data();
     let mut token_counter = data
         .tokens
@@ -43,11 +39,11 @@ pub async fn add_tokens(
         Ok(amount)
     }
 }
-pub async fn remove_tokens(
+pub fn remove_tokens(
     ctx: Context<'_>,
     user: &serenity::User,
     amount: Token,
-) -> Result<Token, Error> {
+) -> Result<Token, InsufficentTokensError> {
     let data = ctx.data();
     let mut token_counter = data
         .tokens
@@ -56,12 +52,12 @@ pub async fn remove_tokens(
     if let Some(count) = token_counter.get_mut(&user.id) {
         if amount > *count {
             // User is too broke
-            return Err(Box::new(InsufficentTokensError));
+            return Err(InsufficentTokensError);
         }
         *count -= amount;
         Ok(*count)
     } else {
         // User DNE so they have no tokens
-        Err(Box::new(InsufficentTokensError))
+        Err(InsufficentTokensError)
     }
 }

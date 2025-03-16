@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use crate::commands::info::info;
 use crate::commands::joke::joke;
 use crate::commands::leaderboard::leaderboard;
+use crate::commands::slots::slots;
 use crate::commands::tokens::tokens;
 use crate::utils::database::load_data;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
@@ -37,7 +38,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![info(), tokens(), joke(), leaderboard()],
+            commands: vec![info(), tokens(), joke(), leaderboard(), slots()],
             prefix_options,
             ..Default::default()
         })
