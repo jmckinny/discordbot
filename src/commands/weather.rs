@@ -1,6 +1,6 @@
 use crate::commands::types::{Context, Error};
 use poise::CreateReply;
-use reqwest::header::{ACCEPT, USER_AGENT};
+use reqwest::header::USER_AGENT;
 use serde_json::Value;
 use serenity::all::{CreateEmbed, MessageBuilder};
 

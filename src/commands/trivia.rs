@@ -151,7 +151,7 @@ impl Response {
         let mut answers = vec![correct_answer.to_string()];
         answers.append(&mut incorret_answers);
 
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         answers.shuffle(&mut rng);
 
         let choices = answers
