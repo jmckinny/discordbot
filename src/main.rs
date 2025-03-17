@@ -48,6 +48,8 @@ async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![
+                help(),
+                age(),
                 info(),
                 tokens(),
                 joke(),
@@ -56,7 +58,6 @@ async fn main() {
                 weather(),
                 wordle(),
                 trivia(),
-                help(),
             ],
             prefix_options,
             ..Default::default()
