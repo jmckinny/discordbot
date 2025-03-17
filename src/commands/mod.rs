@@ -1,3 +1,4 @@
+pub mod age;
 pub mod help;
 pub mod info;
 pub mod joke;

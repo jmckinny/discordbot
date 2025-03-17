@@ -3,6 +3,7 @@ mod utils;
 
 use std::collections::HashMap;
 
+use crate::commands::age::age;
 use crate::commands::help::help;
 use crate::commands::info::info;
 use crate::commands::joke::joke;
