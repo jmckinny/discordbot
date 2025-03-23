@@ -2,7 +2,7 @@ use crate::commands::types::{Context, Error};
 use std::collections::HashSet;
 use std::time::Duration;
 
-use crate::utils::tokens::add_tokens;
+use crate::utils::database;
 use crate::utils::wordle;
 use rand::seq::IteratorRandom;
 use serenity::all::MessageBuilder;
@@ -68,7 +68,7 @@ pub async fn wordle(ctx: Context<'_>) -> Result<(), Error> {
             tokens_won
         );
         ctx.reply(game_won_mssg).await?;
-        add_tokens(ctx, ctx.author(), tokens_won as u64)?;
+        database::add_tokens(&ctx.data().db, ctx.author().id, tokens_won as u64).await?;
     } else {
         let lose_mssg = MessageBuilder::new()
             .push("You lost!  The correct word was ")

@@ -1,7 +1,7 @@
 use crate::commands::types::{Context, Error};
+use crate::utils::database;
 use std::time::Duration;
 
-use crate::utils::tokens::*;
 use ::serenity::all::EditMessage;
 use poise::{CreateReply, serenity_prelude as serenity};
 use rand::prelude::*;
@@ -90,7 +90,7 @@ pub async fn trivia(ctx: Context<'_>) -> Result<(), Error> {
             Difficulty::Hard => HARD_REWARD,
         };
 
-        add_tokens(ctx, ctx.author(), reward)?;
+        database::add_tokens(&ctx.data().db, ctx.author().id, reward).await?;
 
         let reply = MessageBuilder::new()
             .push_line("That's correct!")
