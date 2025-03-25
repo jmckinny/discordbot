@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT tokens FROM users WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "tokens",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "dadd02212a45ba5c8b3ad502de3d67104461e1374c847afb91aa447daf933ef7"
+}
