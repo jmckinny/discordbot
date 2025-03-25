@@ -44,6 +44,10 @@ async fn main() {
     let sqlite_db = connect_to_db()
         .await
         .expect("Failed to open database connection");
+    sqlx::migrate!("./migrations")
+        .run(&sqlite_db)
+        .await
+        .expect("Failed to migrate DB");
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
