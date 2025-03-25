@@ -7,7 +7,7 @@ use serenity::all::CreateEmbed;
 const SLOTS_COST: u64 = 5;
 
 /// Play the slot machine
-#[poise::command(slash_command, prefix_command)]
+#[poise::command(slash_command, prefix_command, category = "Games")]
 pub async fn slots(ctx: Context<'_>) -> Result<(), Error> {
     let user = ctx.author();
     let tokens = database::remove_tokens(&ctx.data().db, user.id, SLOTS_COST).await;

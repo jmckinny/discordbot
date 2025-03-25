@@ -1,7 +1,7 @@
 use crate::commands::types::{Context, Error};
 use poise::samples::HelpConfiguration;
 /// Show help message
-#[poise::command(prefix_command, track_edits, category = "Utility")]
+#[poise::command(prefix_command, slash_command, track_edits, category = "Utility")]
 pub async fn help(
     ctx: Context<'_>,
     #[description = "Command to get help for"]

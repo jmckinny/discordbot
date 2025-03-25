@@ -1,7 +1,7 @@
 use crate::commands::types::{Context, Error};
 use poise::serenity_prelude as serenity;
 /// Displays your or another user's account creation date
-#[poise::command(slash_command, prefix_command)]
+#[poise::command(slash_command, prefix_command, category = "Utility")]
 pub async fn age(
     ctx: Context<'_>,
     #[description = "Selected user"] user: Option<serenity::User>,

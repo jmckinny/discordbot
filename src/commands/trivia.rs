@@ -17,7 +17,7 @@ const MEDIUM_REWARD: u64 = 3;
 const HARD_REWARD: u64 = 5;
 
 /// Start a trivia game
-#[poise::command(slash_command, prefix_command)]
+#[poise::command(slash_command, prefix_command, category = "Games")]
 pub async fn trivia(ctx: Context<'_>) -> Result<(), Error> {
     let response: Response = serde_json::from_str(&reqwest::get(API_URL).await?.text().await?)?;
     let trivia_question = response.to_message();

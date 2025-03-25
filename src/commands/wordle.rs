@@ -9,7 +9,7 @@ use serenity::all::MessageBuilder;
 use serenity::collector::MessageCollector;
 
 /// Start a wordle game
-#[poise::command(slash_command, prefix_command)]
+#[poise::command(slash_command, prefix_command, category = "Games")]
 pub async fn wordle(ctx: Context<'_>) -> Result<(), Error> {
     let solution = choose_solution().await;
     let mut game_state = wordle::Game::new(&solution);

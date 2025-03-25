@@ -5,7 +5,7 @@ const JOKE_API_URL: &str = "https://icanhazdadjoke.com/";
 const USER_AGENT_STRING: &str = "frothybot (https://github.com/jmckinny/frothybot)";
 
 /// Tell the user a joke
-#[poise::command(slash_command, prefix_command)]
+#[poise::command(slash_command, prefix_command, category = "Games")]
 pub async fn joke(ctx: Context<'_>) -> Result<(), Error> {
     let client = reqwest::Client::new();
     let response = client
