@@ -87,3 +87,18 @@ pub async fn remove_tokens(
     }
     Ok(())
 }
+
+pub async fn list_leadboard(pool: &SqlitePool) -> Result<Vec<(UserId, Token)>, DatabaseError> {
+    let results = sqlx::query!(r#"SELECT id, tokens FROM users ORDER BY tokens DESC LIMIT 10"#)
+        .fetch_all(pool)
+        .await?;
+
+    let mut leaders = Vec::new();
+    for row in results {
+        let user_id_num = u64::try_from(row.id)?;
+        let token_amount = u64::try_from(row.tokens)?;
+        leaders.push((UserId::new(user_id_num), token_amount));
+    }
+
+    Ok(leaders)
+}
