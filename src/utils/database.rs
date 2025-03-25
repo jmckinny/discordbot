@@ -2,7 +2,6 @@ use anyhow::{Context, Result};
 use serenity::model::prelude::UserId;
 use sqlx::sqlite::SqlitePool;
 use std::{env, error::Error, num::TryFromIntError};
-use tracing::info;
 
 use crate::Token;
 
