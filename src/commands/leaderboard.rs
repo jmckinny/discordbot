@@ -4,7 +4,7 @@ use ::serenity::all::CreateEmbed;
 use poise::CreateReply;
 
 /// Show token leaderboard
-#[poise::command(slash_command, prefix_command, category = "Utility")]
+#[poise::command(slash_command, prefix_command, category = "Tokens")]
 pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
     let leaderboard = database::list_leadboard(&ctx.data().db).await?;
 
