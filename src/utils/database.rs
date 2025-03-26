@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use serenity::model::prelude::UserId;
-use sqlx::sqlite::SqlitePool;
-use std::{env, error::Error, num::TryFromIntError};
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePool};
+use std::{env, error::Error, num::TryFromIntError, str::FromStr};
 
 use crate::Token;
 
@@ -37,7 +37,13 @@ impl From<TryFromIntError> for DatabaseError {
 impl Error for DatabaseError {}
 
 pub async fn connect_to_db() -> Result<SqlitePool> {
-    SqlitePool::connect(&env::var("DATABASE_URL")?)
+    let opts = SqliteConnectOptions::from_str(
+        &env::var("DATABASE_URL").unwrap_or("sqlite://database.db".to_string()),
+    )?
+    .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
+    .create_if_missing(true);
+
+    SqlitePool::connect_with(opts)
         .await
         .context("Failed to open db connection")
 }
