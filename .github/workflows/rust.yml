@@ -19,8 +19,7 @@ jobs:
       - name: Migrate database
         run: |
           cargo install --version=0.8.0 sqlx-cli --no-default-features --features sqlite
-          cargo sqlx database create
-          cargo sqlx migrate run
+          cargo sqlx database setup
       - name: Build
         run: cargo build --verbose
       - name: Run tests
