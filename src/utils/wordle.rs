@@ -30,8 +30,8 @@ impl Game {
         }
     }
 
-    pub async fn guess(&mut self, guess: &str) -> Result<GuessScore, &str> {
-        if !is_valid_word(guess).await {
+    pub fn guess(&mut self, guess: &str) -> Result<GuessScore, &str> {
+        if !is_valid_word(guess) {
             return Err("Invalid guess");
         }
         self.guess_left -= 1;
@@ -99,7 +99,7 @@ impl Game {
     }
 }
 
-async fn is_valid_word(word: &str) -> bool {
+fn is_valid_word(word: &str) -> bool {
     let words = include_str!("../../data/wordlist.txt");
     for w in words.lines() {
         if word == w {

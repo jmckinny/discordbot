@@ -36,7 +36,7 @@ pub async fn wordle(ctx: Context<'_>) -> Result<(), Error> {
         }
 
         let response_msg = response.expect("Unreachable");
-        match game_state.guess(&response_msg.content).await {
+        match game_state.guess(&response_msg.content) {
             Ok(score) => {
                 let lower_letters = response_msg.content.to_uppercase();
                 let chars_used = lower_letters.chars();
@@ -124,7 +124,7 @@ mod test {
         let solution = "vodka";
         let mut game = wordle::Game::new(solution);
 
-        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        let response = (game.guess(guess)).unwrap();
         assert_eq!(response.to_string(), "🟨🟩🟥🟥🟩")
     }
 
@@ -134,7 +134,7 @@ mod test {
         let solution = "thorn";
         let mut game = wordle::Game::new(solution);
 
-        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        let response = (game.guess(guess)).unwrap();
         assert_eq!(response.to_string(), "🟥🟨🟥🟨🟥")
     }
 
@@ -144,7 +144,7 @@ mod test {
         let solution = "pains";
         let mut game = wordle::Game::new(solution);
 
-        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        let response = (game.guess(guess)).unwrap();
         assert_eq!(response.to_string(), "🟨🟨🟥🟥🟥")
     }
 
@@ -154,7 +154,7 @@ mod test {
         let solution = "raise";
         let mut game = wordle::Game::new(solution);
 
-        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        let response = (game.guess(guess)).unwrap();
         assert_eq!(response.to_string(), "🟥🟥🟨🟥🟥")
     }
 
@@ -164,7 +164,7 @@ mod test {
         let solution = "still";
         let mut game = wordle::Game::new(solution);
 
-        let response = tokio_test::block_on(game.guess(guess)).unwrap();
+        let response = (game.guess(guess)).unwrap();
         assert_eq!(response.to_string(), "🟨🟥🟥🟥🟨")
     }
 }
