@@ -11,6 +11,7 @@ use crate::commands::leaderboard::leaderboard;
 use crate::commands::slots::slots;
 use crate::commands::tokens::tokens;
 use crate::commands::trivia::trivia;
+use crate::commands::types::Error;
 use crate::commands::weather::weather;
 use crate::commands::wordle::wordle;
 use crate::utils::database::connect_to_db;
@@ -63,6 +64,25 @@ async fn main() {
                 wordle(),
                 trivia(),
             ],
+            on_error: |error| Box::pin(on_error(error)),
+            pre_command: |ctx| {
+                Box::pin(async move {
+                    info!(
+                        "User {:?} is executing {:?}",
+                        ctx.author().name,
+                        ctx.command().qualified_name
+                    );
+                })
+            },
+            post_command: |ctx| {
+                Box::pin(async move {
+                    info!(
+                        "User {:?} executed command {:?}",
+                        ctx.author().name,
+                        ctx.command().qualified_name
+                    );
+                })
+            },
             prefix_options,
             ..Default::default()
         })
@@ -84,5 +104,22 @@ async fn main() {
     info!("Starting client!");
     if let Err(why) = client.start().await {
         error!("ERROR: start failed due to {:?}", why);
+    }
+}
+
+async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
+    // This is our custom error handler
+    // They are many errors that can occur, so we only handle the ones we want to customize
+    // and forward the rest to the default handler
+    match error {
+        poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
+        poise::FrameworkError::Command { error, ctx, .. } => {
+            error!("Error in command `{}`: {:?}", ctx.command().name, error,);
+        }
+        error => {
+            if let Err(e) = poise::builtins::on_error(error).await {
+                error!("Error while handling error: {}", e)
+            }
+        }
     }
 }
