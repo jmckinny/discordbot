@@ -16,7 +16,7 @@ use crate::commands::wordle::wordle;
 use crate::utils::database::connect_to_db;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 
-use ::serenity::all::UserId;
+use ::serenity::all::{ActivityData, UserId};
 use dotenvy::dotenv;
 use sqlx::SqlitePool;
 use tracing::{error, info};
@@ -76,6 +76,7 @@ async fn main() {
         .build();
 
     let mut client = serenity::ClientBuilder::new(token, intents)
+        .activity(ActivityData::custom("By your command"))
         .framework(framework)
         .await
         .expect("Failed to create client");
