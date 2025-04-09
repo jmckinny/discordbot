@@ -102,15 +102,18 @@ async fn main() {
         .await
         .expect("Failed to create client");
 
-    tokio::spawn(async move {
-        let api = api::create_app().await;
-        let listener = tokio::net::TcpListener::bind("127.0.0.1:5000")
-            .await
-            .expect("Failed to start listener for API");
-        axum::serve(listener, api)
-            .await
-            .expect("Failed to start API service");
-    });
+    #[cfg(feature = "api")]
+    {
+        tokio::spawn(async move {
+            let api = api::create_app().await;
+            let listener = tokio::net::TcpListener::bind("127.0.0.1:5000")
+                .await
+                .expect("Failed to start listener for API");
+            axum::serve(listener, api)
+                .await
+                .expect("Failed to start API service");
+        });
+    }
 
     info!("Starting client!");
     if let Err(why) = client.start().await {
