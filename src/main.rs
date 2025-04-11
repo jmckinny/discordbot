@@ -2,7 +2,7 @@ mod api;
 mod commands;
 mod utils;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use crate::commands::age::age;
 use crate::commands::help::help;
@@ -19,7 +19,7 @@ use crate::utils::database::connect_to_db;
 use api::ApiState;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 
-use ::serenity::all::{ActivityData, UserId};
+use ::serenity::all::{ActivityData, Http, UserId};
 use dotenvy::dotenv;
 use sqlx::SqlitePool;
 use tracing::{error, info};
@@ -105,26 +105,28 @@ async fn main() {
 
     #[cfg(feature = "api")]
     {
-        let api_state = ApiState {
-            discord: client.http.clone(),
-        };
-        tokio::spawn(async move {
-            let socket = "127.0.0.1:5000";
-            let api = api::create_app(api_state).await;
-            let listener = tokio::net::TcpListener::bind(socket)
-                .await
-                .expect("Failed to start listener for API");
-            info!("API Listening on http://{}", socket);
-            axum::serve(listener, api)
-                .await
-                .expect("Failed to start API service");
-        });
+        start_api(client.http.clone()).await;
     }
 
     info!("Starting client!");
     if let Err(why) = client.start().await {
         error!("ERROR: start failed due to {:?}", why);
     }
+}
+
+pub async fn start_api(http: Arc<Http>) {
+    let api_state = ApiState { discord: http };
+    tokio::spawn(async move {
+        let socket = "127.0.0.1:5000";
+        let api = api::create_app(api_state).await;
+        let listener = tokio::net::TcpListener::bind(socket)
+            .await
+            .expect("Failed to start listener for API");
+        info!("API Listening on http://{}", socket);
+        axum::serve(listener, api)
+            .await
+            .expect("Failed to start API service");
+    });
 }
 
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
