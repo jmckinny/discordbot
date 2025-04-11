@@ -16,6 +16,7 @@ use crate::commands::types::Error;
 use crate::commands::weather::weather;
 use crate::commands::wordle::wordle;
 use crate::utils::database::connect_to_db;
+use api::ApiState;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 
 use ::serenity::all::{ActivityData, UserId};
@@ -104,11 +105,16 @@ async fn main() {
 
     #[cfg(feature = "api")]
     {
+        let api_state = ApiState {
+            discord: client.http.clone(),
+        };
         tokio::spawn(async move {
-            let api = api::create_app().await;
-            let listener = tokio::net::TcpListener::bind("127.0.0.1:5000")
+            let socket = "127.0.0.1:5000";
+            let api = api::create_app(api_state).await;
+            let listener = tokio::net::TcpListener::bind(socket)
                 .await
                 .expect("Failed to start listener for API");
+            info!("API Listening on http://{}", socket);
             axum::serve(listener, api)
                 .await
                 .expect("Failed to start API service");
