@@ -35,6 +35,7 @@ pub struct Data {
 async fn main() {
     dotenv().ok();
     tracing_subscriber::fmt::init();
+
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
@@ -67,15 +68,6 @@ async fn main() {
                 trivia(),
             ],
             on_error: |error| Box::pin(on_error(error)),
-            pre_command: |ctx| {
-                Box::pin(async move {
-                    info!(
-                        "User {:?} is executing {:?}",
-                        ctx.author().name,
-                        ctx.command().qualified_name
-                    );
-                })
-            },
             post_command: |ctx| {
                 Box::pin(async move {
                     info!(
