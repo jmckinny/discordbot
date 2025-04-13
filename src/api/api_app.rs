@@ -6,16 +6,20 @@ use axum::{
     http::{Request, Response},
     routing::get,
 };
-use serenity::all::Http;
+use serenity::all::{Cache, Http};
+use serenity::prelude::TypeMap;
 use std::{sync::Arc, time::Duration};
+use tokio::sync::RwLock;
 use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};
 use tracing::{Span, info_span};
 
 use super::routes::{dm_group, dm_user, health_check};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ApiState {
     pub discord: Arc<Http>,
+    pub discord_cache: Arc<Cache>,
+    pub state: Arc<RwLock<TypeMap>>,
 }
 
 pub async fn create_app(state: ApiState) -> Router<()> {

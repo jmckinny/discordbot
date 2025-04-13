@@ -20,14 +20,19 @@ use crate::utils::database::connect_to_db;
 use api::ApiState;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 
-use ::serenity::all::{ActivityData, Http, UserId};
+use ::serenity::{
+    all::{ActivityData, Cache, Http, UserId},
+    prelude::TypeMap,
+};
 use dotenvy::dotenv;
 use sqlx::SqlitePool;
+use tokio::sync::RwLock;
 use tracing::{error, info};
 
 pub type Token = u64;
 pub type TokenCounter = HashMap<UserId, Token>;
 
+#[derive(Debug)]
 pub struct Data {
     db: SqlitePool,
 } // User data, which is stored and accessible in all command invocations
@@ -99,7 +104,12 @@ async fn main() {
 
     #[cfg(feature = "api")]
     {
-        start_api(client.http.clone()).await;
+        start_api(
+            client.http.clone(),
+            client.cache.clone(),
+            client.data.clone(),
+        )
+        .await;
     }
 
     info!("Starting client!");
@@ -108,8 +118,12 @@ async fn main() {
     }
 }
 
-pub async fn start_api(http: Arc<Http>) {
-    let api_state = ApiState { discord: http };
+pub async fn start_api(discord: Arc<Http>, cache: Arc<Cache>, state: Arc<RwLock<TypeMap>>) {
+    let api_state = ApiState {
+        discord,
+        discord_cache: cache,
+        state,
+    };
     tokio::spawn(async move {
         let socket = "127.0.0.1:5000";
         let api = api::create_app(api_state).await;
