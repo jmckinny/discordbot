@@ -7,5 +7,6 @@ pub mod slots;
 pub mod tokens;
 pub mod trivia;
 pub mod types;
+pub mod user_id;
 pub mod weather;
 pub mod wordle;

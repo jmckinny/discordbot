@@ -11,7 +11,7 @@ use std::{sync::Arc, time::Duration};
 use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};
 use tracing::{Span, info_span};
 
-use super::routes::{dm_user, health_check};
+use super::routes::{dm_group, dm_user, health_check};
 
 #[derive(Debug, Clone)]
 pub struct ApiState {
@@ -22,6 +22,7 @@ pub async fn create_app(state: ApiState) -> Router<()> {
     let api_routes = Router::new()
         .route("/health_check", get(health_check))
         .route("/dm_user", post(dm_user))
+        .route("/dm_group", post(dm_group))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(|request: &Request<_>| {

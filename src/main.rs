@@ -13,6 +13,7 @@ use crate::commands::slots::slots;
 use crate::commands::tokens::tokens;
 use crate::commands::trivia::trivia;
 use crate::commands::types::Error;
+use crate::commands::user_id::user_id;
 use crate::commands::weather::weather;
 use crate::commands::wordle::wordle;
 use crate::utils::database::connect_to_db;
@@ -66,6 +67,7 @@ async fn main() {
                 weather(),
                 wordle(),
                 trivia(),
+                user_id(),
             ],
             on_error: |error| Box::pin(on_error(error)),
             post_command: |ctx| {
