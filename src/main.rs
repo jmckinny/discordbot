@@ -1,8 +1,9 @@
+#[cfg(feature = "api")]
 mod api;
 mod commands;
 mod utils;
 
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use crate::commands::age::age;
 use crate::commands::help::help;
@@ -17,16 +18,11 @@ use crate::commands::user_id::user_id;
 use crate::commands::weather::weather;
 use crate::commands::wordle::wordle;
 use crate::utils::database::connect_to_db;
-use api::ApiState;
 use poise::{PrefixFrameworkOptions, serenity_prelude as serenity};
 
-use ::serenity::{
-    all::{ActivityData, Cache, Http, UserId},
-    prelude::TypeMap,
-};
+use ::serenity::all::{ActivityData, UserId};
 use dotenvy::dotenv;
 use sqlx::SqlitePool;
-use tokio::sync::RwLock;
 use tracing::{error, info};
 
 pub type Token = u64;
@@ -104,37 +100,19 @@ async fn main() {
 
     #[cfg(feature = "api")]
     {
-        start_api(
-            client.http.clone(),
-            client.cache.clone(),
-            client.data.clone(),
-        )
-        .await;
+        use api::start_api;
+        let discord_http = client.http.clone();
+        let discord_cache = client.cache.clone();
+        let state = client.data.clone();
+        tokio::spawn(async move {
+            start_api(discord_http, discord_cache, state).await;
+        });
     }
 
     info!("Starting client!");
     if let Err(why) = client.start().await {
         error!("ERROR: start failed due to {:?}", why);
     }
-}
-
-pub async fn start_api(discord: Arc<Http>, cache: Arc<Cache>, state: Arc<RwLock<TypeMap>>) {
-    let api_state = ApiState {
-        discord,
-        discord_cache: cache,
-        state,
-    };
-    tokio::spawn(async move {
-        let socket = "127.0.0.1:5000";
-        let api = api::create_app(api_state).await;
-        let listener = tokio::net::TcpListener::bind(socket)
-            .await
-            .expect("Failed to start listener for API");
-        info!("API Listening on http://{}", socket);
-        axum::serve(listener, api)
-            .await
-            .expect("Failed to start API service");
-    });
 }
 
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {

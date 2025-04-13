@@ -11,7 +11,7 @@ use serenity::prelude::TypeMap;
 use std::{sync::Arc, time::Duration};
 use tokio::sync::RwLock;
 use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};
-use tracing::{Span, info_span};
+use tracing::{Span, info, info_span};
 
 use super::routes::{dm_group, dm_user, health_check};
 
@@ -22,7 +22,7 @@ pub struct ApiState {
     pub state: Arc<RwLock<TypeMap>>,
 }
 
-pub async fn create_app(state: ApiState) -> Router<()> {
+async fn create_app(state: ApiState) -> Router<()> {
     let api_routes = Router::new()
         .route("/health_check", get(health_check))
         .route("/dm_user", post(dm_user))
@@ -44,6 +44,31 @@ pub async fn create_app(state: ApiState) -> Router<()> {
                 .on_failure(on_failure),
         );
     Router::new().nest("/api/v1/", api_routes).with_state(state)
+}
+
+pub async fn start_api(discord: Arc<Http>, cache: Arc<Cache>, state: Arc<RwLock<TypeMap>>) {
+    start_api_on_socket(discord, cache, state, "127.0.0.1:5000").await;
+}
+
+pub async fn start_api_on_socket(
+    discord: Arc<Http>,
+    cache: Arc<Cache>,
+    state: Arc<RwLock<TypeMap>>,
+    socket: &str,
+) {
+    let api_state = ApiState {
+        discord,
+        discord_cache: cache,
+        state,
+    };
+    let api = create_app(api_state).await;
+    let listener = tokio::net::TcpListener::bind(socket)
+        .await
+        .expect("Failed to start listener for API");
+    info!("API Listening on http://{}", socket);
+    axum::serve(listener, api)
+        .await
+        .expect("Failed to start API service");
 }
 
 fn on_response(response: &Response<Body>, latency: Duration, _: &Span) {
