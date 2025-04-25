@@ -1,4 +1,4 @@
-# Frothybot
+# Discord Bot
 
 A basic discord bot build with [serenity](https://github.com/serenity-rs/serenity)
 
@@ -9,4 +9,3 @@ A basic discord bot build with [serenity](https://github.com/serenity-rs/serenit
 - Weather using the [national weather service API](https://www.weather.gov/documentation/services-web-api)
 - Jokes pulled from [icanhazdadjoke](https://icanhazdadjoke.com/api)
 - HTTP API for plugin integration
-
