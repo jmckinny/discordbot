@@ -1,4 +1,4 @@
-FROM rust:1.95.0 AS builder
+FROM rust:1.96 AS builder
 WORKDIR /usr/src/discordbot
 COPY . .
 RUN cargo install --path .
