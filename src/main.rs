@@ -43,7 +43,7 @@ async fn main() {
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let prefix_options = PrefixFrameworkOptions {
-        prefix: Some(String::from("!")),
+        prefix: Some("!".into()),
         ..Default::default()
     };
 
